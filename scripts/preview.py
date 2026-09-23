@@ -16,16 +16,14 @@ from __future__ import annotations
 import pathlib
 import re
 import subprocess
-import sys
-
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-from build_assets import ALT_FRAME_CSS  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 ASSETS = ROOT / "assets"
 OUT = ROOT / ".preview"
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 PAGE = {"light": "#ffffff", "dark": "#0d1117"}
+# Pins every animated class (see DESIGN.md, Motion) to its other extreme.
+ALT_FRAME_CSS = ".tw,.pulse{opacity:.3!important;animation:none!important}.orbit{transform:rotate(180deg)!important}"
 CSS = "https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown-{}.css"
 SLICE = {"desktop": 1400, "phone": 1600}
 
@@ -54,7 +52,7 @@ def frames(svg: pathlib.Path) -> list[tuple[str, pathlib.Path]]:
 def gallery(theme: str) -> None:
     other = "light" if theme == "dark" else "dark"
     items = []
-    for svg in sorted(ASSETS.glob("*.svg")):
+    for svg in sorted(ASSETS.rglob("*.svg")):
         if f"-{other}" in svg.stem:
             continue
         cells = "".join(

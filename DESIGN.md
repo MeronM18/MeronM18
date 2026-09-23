@@ -1,63 +1,73 @@
 # Design direction
 
-The profile reads as a set of **terminal windows on a quiet page**. Dark cards carry the content, and the page around them stays calm. Everything comes from `assets/profile-header.svg`, which is the source of truth for palette, type and window style.
-
-Direction chosen with the `ui-ux-pro-max` skill. Its design-system database was not installed, so this uses the skill's built-in rules (contrast, no emoji icons, phone layouts, meaningful and reduced motion, color tokens, a 12px text minimum), not a generated palette.
+The profile reads as **a night sky of finished work**: midnight cards with a faint starfield, big grotesk titles, a serif italic voice, and one ultraviolet accent. Each project gets its own card built around a real screenshot or a diagram of how it works. The palette lives in `scripts/brand.py`, which every generator imports.
 
 ## Type
 
-- **IBM Plex Mono** (SIL OFL 1.1) is the only typeface. Every letter is outlined into SVG paths by `scripts/build_assets.py`, so nothing depends on installed fonts.
-- Weights: Regular for body, SemiBold for titles and prompts, Bold with letter-spacing for UPPERCASE labels.
-- Sizes (desktop cards, 760 wide): labels 11–13px bold with +2 to +2.4 tracking, body 12–14px, titles 15–28px.
-- Phone variants (400 wide) never go below 13px in the SVG. They render at about 0.85×, so the smallest text stays near 11–12px on screen.
+Three families, all SIL OFL 1.1, stored in `scripts/fonts/`:
+
+- **Bricolage Grotesque**: 800 at display size for names and titles (`display`), 400 and 600 for body copy (`body`, `bodybold`).
+- **Instrument Serif Italic** (`serif`): taglines only. The accent half of a tagline is violet.
+- **JetBrains Mono** 500 and 700 (`mono`, `monobold`): UPPERCASE labels, eyebrows, tech pills and status, with +2 to +4 tracking.
+
+SVGs embed a subset of each font (only the glyphs they use) as base64 WOFF, since images on GitHub can't load web fonts. Cards are HTML rendered by headless Chrome, so they use the TTFs directly.
 
 ## Color tokens
 
 | Token | Hex | Use |
 | :-- | :-- | :-- |
-| `bg` | `#0A0A0B` | Card background |
-| `panel` | `#111113` | Boxes inside a card |
-| `border` | `#262628` | Card and box outlines |
-| `rule` | `#242426` | Divider lines inside cards |
-| `text` | `#F2F0EB` | Primary text |
-| `soft` | `#B8B6B1` | Secondary text |
-| `muted` | `#8A8A8A` | Labels, captions, "private" status (5.7:1 on `bg`) |
-| `dim` | `#4A4946` | Separators and dotted connectors only, never text |
-| **`accent`** | `#C9BFA8` | Brand: prompts, section numbers, the cursor, arrows, the monogram |
-| **`live`** | `#8FBF8F` | Status only: something is deployed and public |
-| **`build`** | `#D9A65B` | Status only: in development or private beta |
+| `INK` | `#0A0A10` | Card background |
+| `PANEL` | `#12121A` | Tiles, buttons, windows inside a card |
+| `RAISED` | `#1A1A25` | Window chrome, raised boxes |
+| `LINE` | `#272733` | Borders and rules |
+| `TEXT` | `#F3F1F8` | Titles and primary text |
+| `SOFT` | `#C7C3D4` | Body copy, pill labels |
+| `MUTED` | `#8E8A9E` | Secondary labels and captions |
+| **`VIOLET`** | `#A994FF` | Brand accent: eyebrows, the name's period, tagline accents, the star mark |
+| `VIOLET_DEEP` | `#5A3FD9` | Violet on white (light-theme section headings, light snake) |
+| **`VOLT`** | `#D4FF4F` | Signal only: something is live or running right now |
 
-Light-theme section headings (transparent, on GitHub's white page): label `#57534C`, accent `#6F6450`, rule `#DAD5C9`. Both text colors pass 4.5:1 on white.
+Light-theme section headings use `LIGHT_TEXT` `#1B1830` and `LIGHT_LINE` `#E2DEF0` on GitHub's white page. Dark cards look the same in both themes.
 
-**Status is never shown by color alone.** Every status dot has a text label next to it: `LIVE` (live), `BETA` and `BUILDING` (build), and `PRIVATE`, `DEMO` and `SOURCE` (muted).
+**Status is never color alone.** Every status dot sits next to a label (`LIVE`, `PRIVATE DEPLOY`, `PRIVATE BETA`, `IN DEVELOPMENT`).
 
-## Layout and spacing
+## Layout
 
-- Desktop cards are 760 wide with an 18px corner radius, a 1.5px border, and window chrome (three dots, a caption, and a rule at y=52). Content starts 30px from the left edge.
-- Inner boxes use a 10px radius, 14px gaps, and 14px padding.
-- Spacing steps: 4, 8, 14, 24, 36.
-- Each graphic has a **phone variant** 400 wide with a stacked layout, chosen with `<picture>` `media="(max-width: 600px)"`.
-- Theme-dependent graphics (section headings) use `prefers-color-scheme` sources. Dark cards look the same in both themes, so they only have width variants.
+- Desktop art is 1200 wide with a 28px radius and a 1.5px `LINE` border. Cards render at 2× as WebP.
+- Every card and panel has a **phone variant** (500–600 wide, stacked layout), chosen with `<picture>` `media="(max-width: 600px)"`.
+- Section headings are a four-point star, a grotesk word and a serif italic word, with light and dark versions chosen by `prefers-color-scheme`.
+- Screenshot windows bleed off the card edge, which reads as "there's more."
 
 ## Motion
 
-- Only three animations: the blinking cursor, a slow "live" pulse on status dots, and a highlight that walks through the Imperium pipeline.
-- **Every animation adds to a finished frame.** Without CSS the graphic is complete, and the other keyframe state is also complete. Nothing types in or fades in from empty.
-- Each animated SVG disables its motion under `prefers-reduced-motion: reduce`.
-- Animated SVGs are embedded with `<img>` or `<picture>`, never inlined, so GitHub keeps the animation.
+- Only in SVGs: twinkling stars, a slow orbit around the header constellation, and a pulsing `VOLT` dot.
+- **Every animation adds to a finished frame.** Without CSS the graphic is complete. Nothing types in or fades in from empty.
+- Each animated SVG turns its motion off under `prefers-reduced-motion: reduce`.
+- Animated SVGs are embedded with `<img>`/`<picture>` so GitHub keeps the animation.
+
+## Build
+
+```sh
+python3 -m venv .venv && .venv/bin/pip install fonttools pillow
+.venv/bin/python scripts/build.py     # every asset
+.venv/bin/python scripts/cards.py ledger   # one card
+.venv/bin/python scripts/preview.py   # README in light/dark/phone, into .preview/
+```
+
+Cards need Google Chrome. Screenshots of the live sites live in `scripts/shots/`; the Ledger.m one has its dollar amounts blanked.
+
+The contribution snake is drawn by `.github/workflows/snake.yml` (Platane/snk) every 12 hours and pushed to the `output` branch.
 
 ## Do
 
-- Rebuild with `scripts/build_assets.py` and preview with `scripts/preview.py` in light, dark and phone before committing.
+- Put the facts in the markdown too (alt text and link lines), so the page works without images.
 - Keep one idea per card, and let the screenshots carry the color.
-- Put the facts in the markdown too (alt text and project text), so the page still works without images.
-- Use the beige accent sparingly. It marks what to look at first.
+- Use `VIOLET` for what to look at first, and nothing else competing with it.
 
 ## Don't
 
 - Don't use emoji as icons or bullets.
-- Don't add a new typeface, gradient or accent color without adding it to this file first.
-- Don't use `live`/`build` green or amber for decoration. They mean status.
-- Don't put text in `dim`, or text smaller than 11px in desktop cards or 13px in phone cards.
+- Don't add a typeface or accent color without adding it here first.
+- Don't use `VOLT` for decoration. It means live.
 - Don't embed third-party stat cards or badges. They break the palette and go down.
 - Don't claim anything the repos don't show (users, metrics, App Store status).
