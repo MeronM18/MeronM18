@@ -77,7 +77,7 @@ def backdrop(w: int, h: int) -> str:
 <rect x="0.75" y="0.75" width="{w - 1.5}" height="{h - 1.5}" rx="27.25" fill="none" stroke="{LINE}" stroke-width="1.5"/>"""
 
 
-def signature(text: str, x: float, y: float, size: float, start: float = 0.2) -> str:
+def signature(text: str, x: float, y: float, size: float, start: float = 0.2, sheen: bool = True) -> str:
     """The name in Imperial Script, one path per glyph so they can be written in order.
 
     Without CSS every glyph is filled bone, so a frozen frame shows the whole name.
@@ -102,9 +102,11 @@ def signature(text: str, x: float, y: float, size: float, start: float = 0.2) ->
             continue
         parts.append(f'<path class="sig" style="animation-delay:{delay:.2f}s" pathLength="1" d="{d}"/>')
         delay += 0.16
+    glyphs_g = f'<g fill="{TEXT}" stroke="{TEXT}" stroke-width="1.1" stroke-linejoin="round">{"".join(parts)}</g>'
+    if not sheen:
+        return glyphs_g
     whole, _ = outline_d(text, "script", size, x, y)
-    return (f'<g fill="{TEXT}" stroke="{TEXT}" stroke-width="1.1" stroke-linejoin="round">{"".join(parts)}</g>'
-            f'<path d="{whole}" fill="url(#sheen)" aria-hidden="true"/>')
+    return glyphs_g + f'<path d="{whole}" fill="url(#sheen)" aria-hidden="true"/>'
 
 
 def typing(x: float, y: float, size: float, uid: str) -> str:

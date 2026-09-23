@@ -116,24 +116,37 @@ def ease(a: float, b: float, t: float) -> float:
 def imperium_state(t: float | None) -> dict:
     """How far each part of the trace has played at time t; None is the finished poster frame."""
     if t is None:
-        return {"bubble": 1.0, "rows": [1.0] * len(TRACE), "audit": 1.0}
+        return {"bubble": 1.0, "rows": [1.0] * len(TRACE), "audit": 1.0, "result": 1.0}
     out = 1 - ease(*RESET, t)
     return {
         "bubble": ease(0.2, 0.6, t) * out,
         "rows": [ease(1.1 + 0.6 * i - 0.3, 1.1 + 0.6 * i, t) * out for i in range(len(TRACE))],
         "audit": ease(4.4, 4.8, t) * out,
+        "result": ease(5.0, 5.4, t) * out,
     }
 
 
 def imperium_frames() -> list[tuple[float, int]]:
     """(time, milliseconds) samples: 15 fps while something moves, one long frame while it holds."""
-    moving = [(0.2, 0.6), (4.4, 4.8), RESET] + [(0.8 + 0.6 * i, 1.1 + 0.6 * i) for i in range(len(TRACE))]
+    # 5.0-6.9 covers the result sliding in and the equalizer bouncing while it holds.
+    moving = [(0.2, 0.6), (4.4, 4.8), (5.0, 6.9), RESET] + [(0.8 + 0.6 * i, 1.1 + 0.6 * i) for i in range(len(TRACE))]
     times = {0.0, LOOP}
     for a, b in moving:
         n = max(int((b - a) * 15), 1)
         times.update(round(a + (b - a) * k / n, 3) for k in range(n + 1))
     times = sorted(times)
     return [(t, round((nxt - t) * 1000)) for t, nxt in zip(times, times[1:]) if nxt > t]
+
+
+def eq_bars(t: float | None) -> str:
+    """Four equalizer bars; they bounce while the song plays and rest at a fixed shape on the poster."""
+    import math
+    rest = [0.4, 0.95, 0.6, 0.8]
+    if t is None:
+        heights = rest
+    else:
+        heights = [0.25 + 0.75 * abs(math.sin(t * (5.3 + k * 1.7) + k)) for k in range(4)]
+    return "".join(f'<i style="height:{h * 100:.0f}%"></i>' for h in heights)
 
 
 def imperium(t: float | None = None) -> str:
@@ -165,6 +178,10 @@ def imperium(t: float | None = None) -> str:
       <div class="bubble" style="opacity:{b:.3f};transform:translateY({(1 - b) * 12:.1f}px)">Play Drake on Spotify</div>
       <div class="trace" style="--f:{fill:.3f}"><i class="fill"></i>{rows}</div>
       <div class="audit" style="opacity:{0.25 + 0.75 * st['audit']:.3f}"><span class="dot live" style="opacity:{st['audit']:.3f}"></span>audit · entry written to audit.db</div>
+      <div class="result" style="opacity:{st['result']:.3f};transform:translateY({(1 - st['result']) * 10:.1f}px)">
+        <span class="eq">{eq_bars(t)}</span>
+        <span><b>Now playing on the Mac</b><small>Spotify · Drake</small></span>
+      </div>
     </div>
   </div>
 </div>"""
@@ -192,6 +209,13 @@ def imperium(t: float | None = None) -> str:
   box-shadow:0 0 calc(var(--p) * 16px) rgba(244,240,230,.4)}}
 .row .k{{width:74px;color:{TEXT};letter-spacing:.12em;font-family:'MM Mono Bold';font-size:14px}}
 .row .v{{color:{SOFT};white-space:nowrap}}
+.result{{display:flex;align-items:center;gap:16px;margin-top:14px;padding:16px 18px;border-radius:12px;
+  background:{RAISED};border:1.5px solid {LINE}}}
+.result b{{display:block;font-family:'MM Body Bold';font-weight:400;font-size:17px;color:{TEXT}}}
+.result small{{display:block;margin-top:3px;font-family:'MM Mono';font-size:12.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:{MUTED}}}
+.eq{{display:flex;align-items:flex-end;gap:3px;height:22px;width:22px}}
+.eq i{{display:block;width:4px;border-radius:1px;background:{ACCENT}}}
 .audit{{display:flex;align-items:center;gap:12px;margin-top:26px;padding:14px 18px;border:1.5px dashed {LINE};
   border-radius:12px;font-family:'MM Mono';font-size:14px;letter-spacing:.08em;color:{SOFT}}}
 @media (max-width:700px){{
@@ -386,9 +410,9 @@ def progress() -> str:
 
 
 CARDS = {
-    "imperium": (imperium, 740, 1210),
-    "ledger": (ledger, 620, 790),
-    "dummypeptides": (dummy, 660, 960),
+    "imperium": (imperium, 740, 1290),
+    "ledger": (ledger, 600, 790),
+    "dummypeptides": (dummy, 640, 960),
     "cosmo": (cosmo, 680, 960),
     "progress": (progress, 680, 1400),
 }

@@ -33,7 +33,11 @@ I'm Meron, a Computer Science student at Oakland University. I build things for 
   </picture>
 </a>
 
-<p align="center"><b><a href="https://youtu.be/jEpbP-iGQTk">Watch the demo</a></b> &nbsp;·&nbsp; <a href="https://github.com/MeronM18/Imperium">Source</a></p>
+<p align="center">
+  <a href="https://youtu.be/jEpbP-iGQTk"><img src="./assets/buttons/demo.svg" height="40" alt="Watch the demo" /></a>
+  &nbsp;
+  <a href="https://github.com/MeronM18/Imperium"><img src="./assets/buttons/source.svg" height="40" alt="Imperium source" /></a>
+</p>
 
 <br />
 
@@ -44,7 +48,11 @@ I'm Meron, a Computer Science student at Oakland University. I build things for 
   </picture>
 </a>
 
-<p align="center">Private deployment &nbsp;·&nbsp; <b><a href="https://github.com/MeronM18/Ledger.m">Source</a></b></p>
+<p align="center">
+  <img src="./assets/buttons/private.svg" height="40" alt="Private deployment" />
+  &nbsp;
+  <a href="https://github.com/MeronM18/Ledger.m"><img src="./assets/buttons/source.svg" height="40" alt="Ledger.m source" /></a>
+</p>
 
 <br />
 
@@ -55,7 +63,11 @@ I'm Meron, a Computer Science student at Oakland University. I build things for 
   </picture>
 </a>
 
-<p align="center"><b><a href="https://dummypeptides.com">Visit the live site</a></b> &nbsp;·&nbsp; <a href="https://github.com/MeronM18/dummypeptides">Source</a></p>
+<p align="center">
+  <a href="https://dummypeptides.com"><img src="./assets/buttons/live.svg" height="40" alt="Visit the live site" /></a>
+  &nbsp;
+  <a href="https://github.com/MeronM18/dummypeptides"><img src="./assets/buttons/source.svg" height="40" alt="Dummy Peptides source" /></a>
+</p>
 
 <br />
 
@@ -66,7 +78,9 @@ I'm Meron, a Computer Science student at Oakland University. I build things for 
   </picture>
 </a>
 
-<p align="center"><b><a href="https://github.com/MeronM18/Cosmo">Source</a></b></p>
+<p align="center">
+  <a href="https://github.com/MeronM18/Cosmo"><img src="./assets/buttons/source.svg" height="40" alt="Cosmo source" /></a>
+</p>
 
 <br />
 
@@ -84,7 +98,11 @@ I'm Meron, a Computer Science student at Oakland University. I build things for 
   <img src="./assets/cards/progress.webp" width="100%" alt="StayDue, private beta: upload a syllabus PDF and every deadline lands in one dashboard and calendar, built with a collaborator. Done: V1 backend, dashboard and sign-up redesign, Google sign-in and LMS selection. Next: private beta. EasyMail, in development, phase 12 of 22 complete: a cross-inbox attention layer for Gmail and Outlook. Done: Gmail and Outlook connected, reliability audit, landing page. Next: phase 13, testing." />
 </picture>
 
-<p align="center"><a href="https://github.com/MeronM18/StayDue">StayDue</a> &nbsp;·&nbsp; <a href="https://github.com/MeronM18/EasyMail">EasyMail</a></p>
+<p align="center">
+  <a href="https://github.com/MeronM18/StayDue"><img src="./assets/buttons/staydue.svg" height="40" alt="StayDue source" /></a>
+  &nbsp;
+  <a href="https://github.com/MeronM18/EasyMail"><img src="./assets/buttons/easymail.svg" height="40" alt="EasyMail source" /></a>
+</p>
 
 <br />
 
@@ -123,8 +141,8 @@ I'm Meron, a Computer Science student at Oakland University. I build things for 
 <br />
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/MeronM18/MeronM18/output/snake-dark.svg" />
-  <img src="https://raw.githubusercontent.com/MeronM18/MeronM18/output/snake-light.svg" width="100%" alt="A snake eating my GitHub contribution graph, redrawn every 12 hours" />
+  <source media="(max-width: 600px)" srcset="https://raw.githubusercontent.com/MeronM18/MeronM18/output/grid-phone.svg" />
+  <img src="https://raw.githubusercontent.com/MeronM18/MeronM18/output/grid.svg" width="100%" alt="My GitHub contribution calendar as a steel heatmap, with a light sweeping across it and today's square outlined. Updated every 3 hours." />
 </picture>
 
 <br />

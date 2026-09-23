@@ -47,7 +47,9 @@ Background light is white at 7–9% opacity from the top-left (a desk lamp), plu
 - **Hero signature:** on load, each glyph of the script name is traced as an outline (`stroke-dashoffset` on a `pathLength="1"` path per glyph, staggered left to right), then fills with ink. The rule below it draws out after.
 - **Hero sheen:** once the name is written, a soft light band sweeps across it every 8 seconds.
 - **Toolkit:** tiles rise in row by row on load, then a diagonal wave of steel light passes through the grid every 6 seconds, lifting each logo as it goes. Category underlines draw in.
-- **Imperium card:** an animated WebP (44 frames, ~330 KB, 7.6 s loop). The message arrives, PAIR → PLAN → PERMIT → GATE check off in turn while the progress line fills, RUN lights up, the audit entry is written, then it holds and resets. `cards.py` renders each frame's state in Chrome (`imperium_state(t)`) and `brand.render_anim` assembles them, 15 fps while moving and one long frame while holding.
+- **Imperium card:** an animated WebP (72 frames, ~380 KB, 7.6 s loop). The message arrives, PAIR → PLAN → PERMIT → GATE check off in turn while the progress line fills, RUN lights up, the audit entry is written, a "Now playing on the Mac" result slides in with a bouncing equalizer, then it resets. `cards.py` renders each frame's state in Chrome (`imperium_state(t)`) and `brand.render_anim` assembles them, 15 fps while moving and one long frame while holding.
+- **Contribution grid:** replaces the Platane snake. The calendar as a steel heatmap (quartile levels like GitHub's), a light beam sweeping across it every 7 seconds and today's square outlined and pulsing. Phones get the last 26 weeks so the squares stay readable.
+- **Footer:** "Let's build it." is a second signature in Imperial Script that writes itself, holds, fades and writes again on a 9-second loop, so it plays whenever someone scrolls to it.
 - **Stats panel:** the weekly contributions line draws itself, the area and peak marker fade in, the language bar grows segment by segment.
 - **Section headings:** the hairline draws out from the words and the diamond lands at its end.
 - **Status pulse:** the "now building" and "say hello" dots breathe.
@@ -66,7 +68,11 @@ python3 -m venv .venv && .venv/bin/pip install fonttools pillow uharfbuzz
 
 Cards need Google Chrome. Live-site screenshots live in `scripts/shots/`; the Ledger.m one has its dollar amounts blanked. Bright screenshots get `tone=True` in `cards.py`, a steel duotone (grayscale, dimmed, steel tint) so they sit in the monochrome page. Dummy Peptides uses it; Cosmo's phone gets the same steel treatment through a CSS filter.
 
-`.github/workflows/profile.yml` runs every 3 hours and on every push to main. It rebuilds the hero with a live **Now building** list, the **stats panel** (`scripts/stats.py`: contribution calendar and language bytes from the GraphQL API, falling back to `scripts/stats-snapshot.json`), (`scripts/now.py`: my two most recently pushed public repos from the last 21 days, excluding this repo, forks, templates and archived repos, with EasyMail · StayDue as the fallback), draws the contribution snake in greyscale, and publishes both to the `output` branch. The README loads the hero from there, so main never gets automated commits. `assets/header.svg` is the local copy.
+`.github/workflows/profile.yml` runs every 3 hours and on every push to main. It rebuilds the hero with a live **Now building** list, the **stats panel** and **contribution grid** (`scripts/stats.py`: contribution calendar and language bytes from the GraphQL API, falling back to `scripts/stats-snapshot.json`), (`scripts/now.py`: my two most recently pushed public repos from the last 21 days, excluding this repo, forks, templates and archived repos, with EasyMail · StayDue as the fallback), and publishes both to the `output` branch. The README loads the hero from there, so main never gets automated commits. `assets/header.svg` is the local copy.
+
+## Links
+
+Every link under a card is a button from `footer.py` (`BUTTONS`): mono label, steel glyph, panel fill. A label that isn't a link, like "Private deployment", uses the dashed `ghost` style so it never looks clickable. No default blue links on the page.
 
 ## Still building
 

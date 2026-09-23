@@ -1,7 +1,7 @@
 name: Live profile
 
 # Every 3 hours: redraw the hero with the repos I've pushed to most recently,
-# the stats panel from my contribution calendar, and the contribution snake.
+# and the stats panel and contribution grid from my contribution calendar.
 # All of it goes to the `output` branch, so main never gets automated commits.
 
 on:
@@ -41,18 +41,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python scripts/header.py --live --out dist
 
-      - name: Build live stats panel
+      - name: Build live stats panel and contribution grid
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python scripts/stats.py --out dist
-
-      # Colors follow DESIGN.md: graphite-to-bone for dark, grey-to-ink for light.
-      - uses: Platane/snk@v3
-        with:
-          github_user_name: ${{ github.repository_owner }}
-          outputs: |
-            dist/snake-dark.svg?palette=github-dark&color_snake=#F4F0E6&color_dots=#161B22,#2A2D31,#4C535B,#8A95A1,#D5DCE3
-            dist/snake-light.svg?color_snake=#111111&color_dots=#EBEDF0,#CDD2D8,#9AA3AD,#5E6873,#1F262E
 
       - uses: crazy-max/ghaction-github-pages@v4
         with:
