@@ -34,6 +34,7 @@ LIGHT_MUTED = "#5E5A54"
 LIGHT_LINE = "#DAD6CF"
 
 FAMILIES = {
+    "script": "MM Script",       # Imperial Script (the hero name, drawn as paths)
     "display": "MM Display",     # Bodoni Moda 500, opsz 96
     "serif": "MM Serif",         # Bodoni Moda Italic 400, opsz 96
     "body": "MM Body",           # Switzer 400 (never embedded in an SVG; see outline())
@@ -83,24 +84,50 @@ def measure(text: str, key: str, size: float, tracking: float = 0) -> float:
     return units * size / upm + tracking * len(text)
 
 
-def outline(text: str, key: str, size: float, x: float, y: float, fill: str, tracking: float = 0,
-            anchor: str = "start", opacity: float = 1) -> str:
-    """`text` as one SVG <path>, for fonts whose license forbids embedding them as fonts (Switzer)."""
+def shape(text: str, key: str, size: float, tracking: float = 0) -> tuple[list, float]:
+    """HarfBuzz-shaped glyphs of `text`: ([(glyph name, x offset, y offset)], advance width), in px."""
+    import uharfbuzz as hb
+    from fontTools.ttLib import TTFont
+
+    path = FONTS / f"{key}.ttf"
+    face = hb.Face(path.read_bytes())
+    font = hb.Font(face)
+    buf = hb.Buffer()
+    buf.add_str(text)
+    buf.guess_segment_properties()
+    hb.shape(font, buf, {"kern": True, "liga": True, "calt": True})
+    order = TTFont(path).getGlyphOrder()
+    k = size / face.upem
+    out, x = [], 0.0
+    for info, pos in zip(buf.glyph_infos, buf.glyph_positions):
+        out.append((order[info.codepoint], x + pos.x_offset * k, pos.y_offset * k))
+        x += pos.x_advance * k + tracking
+    return out, x - tracking
+
+
+def outline_d(text: str, key: str, size: float, x: float, y: float, tracking: float = 0,
+              anchor: str = "start") -> tuple[str, float]:
+    """SVG path data for shaped `text` with its baseline at (x, y), and its width."""
     from fontTools.pens.svgPathPen import SVGPathPen
     from fontTools.pens.transformPen import TransformPen
     from fontTools.ttLib import TTFont
 
     font = TTFont(FONTS / f"{key}.ttf")
-    glyphs, cmap, upm = font.getGlyphSet(), font.getBestCmap(), font["head"].unitsPerEm
+    glyphs, upm = font.getGlyphSet(), font["head"].unitsPerEm
+    run, width = shape(text, key, size, tracking)
+    x0 = x - {"start": 0, "middle": width / 2, "end": width}[anchor]
     k = size / upm
-    width = measure(text, key, size, tracking)
-    cx = x - {"start": 0, "middle": width / 2, "end": width}[anchor]
-    pen = SVGPathPen(glyphs)
-    for ch in text:
-        name = cmap.get(ord(ch), cmap[ord("?")])
-        glyphs[name].draw(TransformPen(pen, (k, 0, 0, -k, cx, y)))
-        cx += glyphs[name].width * k + tracking
-    return f'<path fill="{fill}" opacity="{opacity}" d="{pen.getCommands()}"/>'
+    pen = SVGPathPen(glyphs, ntos=lambda v: f"{v:.1f}".rstrip("0").rstrip("."))
+    for name, gx, gy in run:
+        glyphs[name].draw(TransformPen(pen, (k, 0, 0, -k, x0 + gx, y - gy)))
+    return pen.getCommands(), width
+
+
+def outline(text: str, key: str, size: float, x: float, y: float, fill: str, tracking: float = 0,
+            anchor: str = "start", opacity: float = 1) -> str:
+    """`text` as one SVG <path>, for fonts whose license forbids embedding them as fonts (Switzer)."""
+    d, _ = outline_d(text, key, size, x, y, tracking, anchor)
+    return f'<path fill="{fill}" opacity="{opacity}" d="{d}"/>'
 
 
 def font_files_css() -> str:

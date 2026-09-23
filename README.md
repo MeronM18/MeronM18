@@ -1,6 +1,6 @@
 <picture>
   <source media="(max-width: 600px)" srcset="./assets/header-phone.svg" />
-  <img src="./assets/header.svg" width="100%" alt="Meron Matti, full-stack and indie developer. I build things for fun, then I ship them. Oakland University, B.S. Computer Science, May 2027, Michigan. Now building EasyMail and StayDue." />
+  <img src="./assets/header.svg" width="100%" alt="Meron Matti, written in script. Full-stack and indie developer. I build things for fun, then I ship them; agents that run my Mac from my phone; finance apps wired to real bank accounts; storefronts that ship real orders; iOS apps with paid subscriptions. Computer Science at Oakland University, class of 2027. Now building EasyMail and StayDue." />
 </picture>
 
 <p align="center">
@@ -13,7 +13,7 @@
 
 <br />
 
-I'm Meron, a Computer Science student at Oakland University. I build things for fun, and I ship them. So far that includes an agent that runs my Mac from my phone, a finance app wired to my own bank accounts, a live storefront for a business I co-own, and an iOS app with paid subscriptions.
+I'm Meron, a Computer Science student at Oakland University. I build things for fun, and I ship them. So far that includes an agent that runs my Mac from my phone, a finance app wired to my own bank accounts (now with monthly budgets), a live storefront for a business I co-own, and an iOS app with paid subscriptions.
 
 <br />
 
@@ -81,7 +81,7 @@ I'm Meron, a Computer Science student at Oakland University. I build things for 
 
 <picture>
   <source media="(max-width: 600px)" srcset="./assets/cards/progress-phone.webp" />
-  <img src="./assets/cards/progress.webp" width="100%" alt="StayDue, private beta: upload a syllabus PDF and every deadline lands in one dashboard and calendar. Built with a collaborator. Next.js, Supabase, OpenAI. EasyMail, in development: a cross-inbox attention layer for Gmail and Outlook that shows a recap first and triage second. Next.js, Supabase, Vitest." />
+  <img src="./assets/cards/progress.webp" width="100%" alt="StayDue, private beta: upload a syllabus PDF and every deadline lands in one dashboard and calendar, built with a collaborator. Done: V1 backend, dashboard and sign-up redesign, Google sign-in and LMS selection. Next: private beta. EasyMail, in development, phase 12 of 22 complete: a cross-inbox attention layer for Gmail and Outlook. Done: Gmail and Outlook connected, reliability audit, landing page. Next: phase 13, testing." />
 </picture>
 
 <p align="center"><a href="https://github.com/MeronM18/StayDue">StayDue</a> &nbsp;·&nbsp; <a href="https://github.com/MeronM18/EasyMail">EasyMail</a></p>
@@ -128,5 +128,3 @@ I'm Meron, a Computer Science student at Oakland University. I build things for 
     <img src="./assets/footer.svg" width="100%" alt="Got an idea worth shipping? Let's build it. Thanks for stopping by." />
   </picture>
 </a>
-
-<p align="center"><code>meronmatti123@gmail.com</code></p>

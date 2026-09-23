@@ -2,6 +2,7 @@
 
     .venv/bin/python scripts/fetch_fonts.py
 
+- Imperial Script (OFL): script.ttf, the hero name. Committed.
 - Bodoni Moda (OFL): display.ttf, serif.ttf. Committed.
 - IBM Plex Mono (OFL): mono.ttf, monobold.ttf. Committed.
 - Switzer (ITF Free Font License): body.ttf, bodybold.ttf. Git-ignored, because the
@@ -41,6 +42,10 @@ def main() -> None:
     bodoni("BodoniModa%5Bopsz,wght%5D.ttf", "display.ttf", 500, 96)
     bodoni("BodoniModa-Italic%5Bopsz,wght%5D.ttf", "serif.ttf", 400, 96)
     (FONTS / "OFL-BodoniModa.txt").write_bytes(get(f"{GOOGLE}/bodonimoda/OFL.txt"))
+
+    (FONTS / "script.ttf").write_bytes(get(f"{GOOGLE}/imperialscript/ImperialScript-Regular.ttf"))
+    (FONTS / "OFL-ImperialScript.txt").write_bytes(get(f"{GOOGLE}/imperialscript/OFL.txt"))
+    print("wrote script.ttf")
 
     for weight, out in (("Regular", "mono.ttf"), ("SemiBold", "monobold.ttf")):
         (FONTS / out).write_bytes(get(f"{GOOGLE}/ibmplexmono/IBMPlexMono-{weight}.ttf"))

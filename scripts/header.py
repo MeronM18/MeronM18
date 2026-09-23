@@ -1,11 +1,11 @@
-"""Animated hero: masthead name, a typing line that cycles through what I build (desktop + phone)."""
+"""Animated hero: a signature that writes itself, and a typing line that cycles through what I build."""
 
 from __future__ import annotations
 
 from brand import (ACCENT, ASSETS, INK, LINE, MUTED, SIGNAL, SOFT, TEXT, esc, font_css, measure, outline,
-                   write)
+                   outline_d, shape, write)
 
-NAME = "MERON MATTI"
+NAME = "Meron Matti"
 ROLE = "FULL-STACK · INDIE DEVELOPER"
 COORDS = "42.67° N · 83.22° W"
 PREFIX = "› I build "
@@ -24,15 +24,19 @@ NOW_ITEMS = "EASYMAIL · STAYDUE"
 TYPE, HOLD, DELETE, GAP = 0.055, 2.4, 0.022, 0.4
 
 MOTION = (
+    # Signature: each glyph's outline is drawn, then filled with ink, left to right.
+    "@keyframes draw{from{stroke-dashoffset:1;fill-opacity:0}70%{fill-opacity:0}to{stroke-dashoffset:0;fill-opacity:1}}"
+    ".sig{stroke-dasharray:1;animation:draw 1.5s cubic-bezier(.55,0,.35,1) both}"
+    "@keyframes rule{from{transform:scaleX(0)}to{transform:scaleX(1)}}"
+    ".rule{transform-box:fill-box;transform-origin:left;animation:rule 1.4s cubic-bezier(.6,0,.2,1) 2.4s both}"
     "@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}.caret{animation:blink 1.05s step-end infinite}"
     "@keyframes pulse{0%,100%{opacity:.9}50%{opacity:.3}}.pulse{animation:pulse 2.4s ease-in-out infinite}"
-    "@media (prefers-reduced-motion:reduce){.caret,.pulse{animation:none}}"
+    "@media (prefers-reduced-motion:reduce){.caret,.pulse,.sig,.rule{animation:none}}"
 )
 
 
 def fonts() -> str:
     return font_css(
-        display=NAME,
         monobold=ROLE + NOW,
         mono=COORDS + PREFIX + "".join(PHRASES) + NOW_ITEMS,
     )
@@ -59,7 +63,7 @@ def backdrop(w: int, h: int) -> str:
     <stop offset="0.5" stop-color="#fff" stop-opacity="0.75"/>
     <stop offset="1" stop-color="#fff" stop-opacity="0"/>
     <animateTransform attributeName="gradientTransform" type="translate" values="0 0;{w + 600} 0;{w + 600} 0"
-      keyTimes="0;0.45;1" dur="9s" repeatCount="indefinite"/>
+      keyTimes="0;0.4;1" dur="8s" begin="3.4s" repeatCount="indefinite"/>
   </linearGradient>
   <clipPath id="frame"><rect width="{w}" height="{h}" rx="28"/></clipPath>
 </defs>
@@ -73,16 +77,34 @@ def backdrop(w: int, h: int) -> str:
 <rect x="0.75" y="0.75" width="{w - 1.5}" height="{h - 1.5}" rx="27.25" fill="none" stroke="{LINE}" stroke-width="1.5"/>"""
 
 
-def name_line(text: str, x: float, y: float, size: float, tracking: float) -> str:
-    """The name in bone, with a copy on top that a light band sweeps across every few seconds."""
-    attrs = f'x="{x}" y="{y}" font-family="MM Display" font-size="{size:.1f}" letter-spacing="{tracking}"'
-    return (f'<text {attrs} fill="{TEXT}">{esc(text)}</text>'
-            f'<text {attrs} fill="url(#sheen)" aria-hidden="true">{esc(text)}</text>')
+def signature(text: str, x: float, y: float, size: float, start: float = 0.2) -> str:
+    """The name in Imperial Script, one path per glyph so they can be written in order.
 
+    Without CSS every glyph is filled bone, so a frozen frame shows the whole name.
+    A copy on top catches a light band that sweeps across after the name is written.
+    """
+    from fontTools.pens.svgPathPen import SVGPathPen
+    from fontTools.pens.transformPen import TransformPen
+    from fontTools.ttLib import TTFont
 
-def fit(text: str, key: str, width: float, tracking: float, cap: float) -> float:
-    """Largest size (up to `cap`) at which `text` fits in `width`."""
-    return min(cap, (width - tracking * len(text)) / measure(text, key, 1))
+    from brand import FONTS
+
+    font = TTFont(FONTS / "script.ttf")
+    glyphs, k = font.getGlyphSet(), size / font["head"].unitsPerEm
+    run, _ = shape(text, "script", size)
+    parts, delay = [], start
+    for name, gx, gy in run:
+        pen = SVGPathPen(glyphs, ntos=lambda v: f"{v:.1f}".rstrip("0").rstrip("."))
+        glyphs[name].draw(TransformPen(pen, (k, 0, 0, -k, x + gx, y - gy)))
+        d = pen.getCommands()
+        if not d:  # the space
+            delay += 0.12
+            continue
+        parts.append(f'<path class="sig" style="animation-delay:{delay:.2f}s" pathLength="1" d="{d}"/>')
+        delay += 0.16
+    whole, _ = outline_d(text, "script", size, x, y)
+    return (f'<g fill="{TEXT}" stroke="{TEXT}" stroke-width="1.1" stroke-linejoin="round">{"".join(parts)}</g>'
+            f'<path d="{whole}" fill="url(#sheen)" aria-hidden="true"/>')
 
 
 def typing(x: float, y: float, size: float, uid: str) -> str:
@@ -144,36 +166,41 @@ def svg(w: int, h: int, body: str) -> str:
 
 
 def desktop() -> str:
-    w, h, pad = 1200, 500, 72
-    size = fit(NAME, "display", w - 2 * pad, 6, 150)
+    w, h, pad = 1200, 520, 72
+    size = 206
     mono = 25
+    base = 268
+    rule_y = base + 44
+    type_y = rule_y + 68
     prefix_w = measure(PREFIX, "mono", mono)
     body = f"""
-<text x="{pad}" y="92" font-family="MM Mono Bold" font-size="14" letter-spacing="4" fill="{ACCENT}">{ROLE}</text>
-<text x="{w - pad}" y="92" text-anchor="end" font-family="MM Mono" font-size="14" letter-spacing="2.4" fill="{MUTED}">{esc(COORDS)}</text>
-{name_line(NAME, pad - 4, 128 + size * 0.72, size, 6)}
-<line x1="{pad}" y1="{156 + size * 0.72:.0f}.5" x2="{w - pad}" y2="{156 + size * 0.72:.0f}.5" stroke="{LINE}" stroke-width="1.5"/>
-<text x="{pad}" y="{214 + size * 0.72:.0f}" font-family="MM Mono" font-size="{mono}" fill="{MUTED}"><tspan fill="{ACCENT}">›</tspan>{esc(PREFIX[1:])}</text>
-{typing(pad + prefix_w, 214 + size * 0.72, mono, "tw")}
-{outline(ABOUT, "body", 18, pad, h - 66, SOFT)}
-{now_chip(w - pad, h - 66, 13.5, anchor_end=True)}"""
+<text x="{pad}" y="88" font-family="MM Mono Bold" font-size="14" letter-spacing="4" fill="{ACCENT}">{ROLE}</text>
+<text x="{w - pad}" y="88" text-anchor="end" font-family="MM Mono" font-size="14" letter-spacing="2.4" fill="{MUTED}">{esc(COORDS)}</text>
+{signature(NAME, pad - 6, base, size)}
+<line class="rule" x1="{pad}" y1="{rule_y}.5" x2="{w - pad}" y2="{rule_y}.5" stroke="{LINE}" stroke-width="1.5"/>
+<text x="{pad}" y="{type_y}" font-family="MM Mono" font-size="{mono}" fill="{MUTED}"><tspan fill="{ACCENT}">›</tspan>{esc(PREFIX[1:])}</text>
+{typing(pad + prefix_w, type_y, mono, "tw")}
+{outline(ABOUT, "body", 18, pad, h - 64, SOFT)}
+{now_chip(w - pad, h - 64, 13.5, anchor_end=True)}"""
     return svg(w, h, body)
 
 
 def phone() -> str:
-    w, h, pad = 600, 780, 44
-    size = fit("MERON", "display", w - 2 * pad, 5, 170)
+    w, h, pad = 600, 820, 44
+    size = 206
     mono = 19
+    b1, b2 = 290, 440
+    rule_y = b2 + 44
     body = f"""
-<text x="{pad}" y="84" font-family="MM Mono Bold" font-size="16" letter-spacing="3.4" fill="{ACCENT}">FULL-STACK</text>
-<text x="{pad}" y="110" font-family="MM Mono Bold" font-size="16" letter-spacing="3.4" fill="{ACCENT}">INDIE DEVELOPER</text>
-<text x="{w - pad}" y="84" text-anchor="end" font-family="MM Mono" font-size="15" letter-spacing="1.6" fill="{MUTED}">42.67° N</text>
-<text x="{w - pad}" y="110" text-anchor="end" font-family="MM Mono" font-size="15" letter-spacing="1.6" fill="{MUTED}">83.22° W</text>
-{name_line("MERON", pad - 4, 190 + size * 0.72, size, 5)}
-{name_line("MATTI", pad - 4, 214 + size * 1.44, size, 5)}
-<line x1="{pad}" y1="{250 + size * 1.44:.0f}.5" x2="{w - pad}" y2="{250 + size * 1.44:.0f}.5" stroke="{LINE}" stroke-width="1.5"/>
-<text x="{pad}" y="{306 + size * 1.44:.0f}" font-family="MM Mono" font-size="{mono + 2}" fill="{MUTED}"><tspan fill="{ACCENT}">›</tspan>{esc(PREFIX[1:])}</text>
-{typing(pad, 344 + size * 1.44, mono, "tp")}
+<text x="{pad}" y="80" font-family="MM Mono Bold" font-size="16" letter-spacing="3.4" fill="{ACCENT}">FULL-STACK</text>
+<text x="{pad}" y="106" font-family="MM Mono Bold" font-size="16" letter-spacing="3.4" fill="{ACCENT}">INDIE DEVELOPER</text>
+<text x="{w - pad}" y="80" text-anchor="end" font-family="MM Mono" font-size="15" letter-spacing="1.6" fill="{MUTED}">42.67° N</text>
+<text x="{w - pad}" y="106" text-anchor="end" font-family="MM Mono" font-size="15" letter-spacing="1.6" fill="{MUTED}">83.22° W</text>
+{signature("Meron", pad - 4, b1, size)}
+{signature("Matti", pad + 60, b2, size, start=1.1)}
+<line class="rule" x1="{pad}" y1="{rule_y}.5" x2="{w - pad}" y2="{rule_y}.5" stroke="{LINE}" stroke-width="1.5"/>
+<text x="{pad}" y="{rule_y + 58}" font-family="MM Mono" font-size="{mono + 2}" fill="{MUTED}"><tspan fill="{ACCENT}">›</tspan>{esc(PREFIX[1:])}</text>
+{typing(pad, rule_y + 96, mono, "tp")}
 {outline("Computer Science at Oakland University,", "body", 21, pad, h - 138, SOFT)}
 {outline("class of 2027.", "body", 21, pad, h - 108, SOFT)}
 {now_chip(pad, h - 58, 15)}"""

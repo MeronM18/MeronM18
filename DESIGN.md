@@ -1,17 +1,18 @@
 # Design direction
 
-**Quiet money after dark.** Near-black graphite, bone-white type, one cold steel accent, and a high-contrast Didone set like a masthead. It should read like a private dossier: ruled paper, corner registration marks, coordinates instead of a city name. The screenshots are the only saturated color on the page. The palette lives in `scripts/brand.py`, which every generator imports.
+**Quiet money after dark.** Near-black graphite, bone-white type, one cold steel accent, a script signature for the name and a high-contrast Didone for everything titled. It should read like a private dossier: ruled paper, corner registration marks, coordinates instead of a city name. The screenshots are the only saturated color on the page. The palette lives in `scripts/brand.py`, which every generator imports.
 
 ## Type
 
 | Key | Face | Use | License |
 | :-- | :-- | :-- | :-- |
-| `display` | Bodoni Moda 500, opsz 96 | The name (uppercase, +6 tracking), card titles, section words | OFL, committed |
+| `script` | Imperial Script | The hero name only, drawn as paths so it can write itself | OFL, committed |
+| `display` | Bodoni Moda 500, opsz 96 | Card titles, section words | OFL, committed |
 | `serif` | Bodoni Moda Italic 400, opsz 96 | Taglines and the second word of each heading, in steel | OFL, committed |
 | `body` / `bodybold` | Switzer 400 / 500 | Body copy and descriptions | ITF Free Font License, **not committed** |
 | `mono` / `monobold` | IBM Plex Mono 400 / 600 | The typing line, labels, pills, status, coordinates | OFL, committed |
 
-`scripts/fetch_fonts.py` downloads all three and writes the static instances into `scripts/fonts/`.
+`scripts/fetch_fonts.py` downloads all four and writes the static instances into `scripts/fonts/`.
 
 Switzer's license forbids redistributing the font file and only allows embedding that can't be extracted. So Switzer never goes into the repo, and never into an SVG as a font: `brand.outline()` draws it as paths, and cards are rasterized to WebP. Bodoni and Plex are embedded in SVGs as glyph subsets (base64 WOFF), since images on GitHub can't load web fonts.
 
@@ -43,15 +44,17 @@ Background light is white at 7–9% opacity from the top-left (a desk lamp), plu
 ## Motion
 
 - **Hero typing line:** "› I build …" types, holds, deletes and cycles through five phrases, driven by SMIL `<animate>` on clip rects, so it works inside `<img>` on GitHub. The steel caret blinks.
-- **Hero sheen:** a soft light band sweeps across the name every 9 seconds.
+- **Hero signature:** on load, each glyph of the script name is traced as an outline (`stroke-dashoffset` on a `pathLength="1"` path per glyph, staggered left to right), then fills with ink. The rule below it draws out after.
+- **Hero sheen:** once the name is written, a soft light band sweeps across it every 8 seconds.
+- **Toolkit:** tiles rise in row by row on load, then a diagonal wave of steel light passes through the grid every 6 seconds, lifting each logo as it goes. Category underlines draw in.
 - **Status pulse:** the "now building" and "say hello" dots breathe.
-- **Every animation adds to a finished frame.** Without animation the hero shows the first phrase in full with the caret after it, and the name without the sheen.
-- CSS motion (caret, pulse) turns off under `prefers-reduced-motion`. SMIL can't read that media query, so the typing and sheen still run.
+- **Every animation adds to a finished frame.** Without animation the hero shows the whole name and the first phrase in full with the caret after it, and the toolkit shows every tile unlit.
+- CSS motion (signature, rule, caret, pulse, toolkit) turns off under `prefers-reduced-motion`. SMIL can't read that media query, so the typing and sheen still run.
 
 ## Build
 
 ```sh
-python3 -m venv .venv && .venv/bin/pip install fonttools pillow
+python3 -m venv .venv && .venv/bin/pip install fonttools pillow uharfbuzz
 .venv/bin/python scripts/fetch_fonts.py   # once, or after a clean clone
 .venv/bin/python scripts/build.py         # every asset
 .venv/bin/python scripts/cards.py ledger  # one card
@@ -61,6 +64,10 @@ python3 -m venv .venv && .venv/bin/pip install fonttools pillow
 Cards need Google Chrome. Live-site screenshots live in `scripts/shots/`; the Ledger.m one has its dollar amounts blanked.
 
 The contribution snake is drawn by `.github/workflows/snake.yml` (Platane/snk) in greyscale every 12 hours and pushed to the `output` branch.
+
+## Still building
+
+The in-progress card is built from each repo's commit history and status docs: StayDue's README and commits, and EasyMail's `PROJECT_STATE.md` phase checklist. Update `STAYDUE_LOG`, `EASYMAIL_LOG` and `EASYMAIL_PHASE` in `scripts/cards.py` when those move.
 
 ## Do
 

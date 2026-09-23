@@ -39,8 +39,8 @@ html,body{{background:transparent;width:100%;height:100%}}
 .tag em{{font-style:normal;color:{ACCENT}}}
 .desc{{font-size:20px;line-height:1.55;color:{SOFT};margin-top:22px;max-width:520px}}
 .pills{{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}}
-.pill{{font-family:'MM Mono';font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:{SOFT};
-  border:1.5px solid {LINE};border-radius:999px;padding:9px 16px;background:rgba(255,255,255,.02)}}
+.pill{{font-family:'MM Mono';font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:{SOFT};
+  border:1.5px solid {LINE};border-radius:999px;padding:8px 14px;background:rgba(255,255,255,.02)}}
 .status{{display:inline-flex;align-items:center;gap:10px;font-family:'MM Mono Bold';font-size:14px;
   letter-spacing:.22em;text-transform:uppercase;color:{SOFT}}}
 .dot{{width:10px;height:10px;border-radius:50%;background:{ACCENT};box-shadow:0 0 0 5px rgba(169,180,192,.14)}}
@@ -177,17 +177,18 @@ def shot_card(eyebrow: str, title: str, tag: str, desc: str, status: str, live: 
     visual = f"""
   <div class="window visual">
     <div class="chrome"><i></i><i></i><i></i><span>{esc(url)}</span></div>
-    {screenshot(shot, crop, 650 if flip else 820)}
+    {screenshot(shot, crop, 700 if flip else 820)}
   </div>"""
     body = f'<div class="wrap{" flip" if flip else ""}">{visual + text if flip else text + visual}</div>'
     css = f"""
 .wrap{{position:relative;display:flex;gap:56px;height:100%;padding:64px 0 0 64px}}
-.wrap.flip{{padding:64px 64px 0 0}}
+.wrap.flip{{padding:64px 64px 0 0;gap:44px}}
+.wrap.flip .text{{width:392px}}
 .text{{width:430px;flex:none}}
 .title{{font-size:92px}}
 .visual{{width:820px;flex:none;align-self:flex-start;margin-top:14px}}
 .wrap:not(.flip) .visual{{border-top-right-radius:0;border-right:none}}
-.wrap.flip .visual{{width:650px;border-top-left-radius:0;border-left:none}}
+.wrap.flip .visual{{width:700px;border-top-left-radius:0;border-left:none}}
 .meta{{display:flex;flex-direction:column;gap:10px;margin-top:26px}}
 .url{{font-family:'MM Mono';font-size:14px;letter-spacing:.06em;color:{MUTED}}}
 @media (max-width:700px){{
@@ -198,7 +199,7 @@ def shot_card(eyebrow: str, title: str, tag: str, desc: str, status: str, live: 
   .visual,.wrap.flip .visual{{margin:0 -36px 0 0;width:auto;border-top-right-radius:0;border-right:none;
     border-top-left-radius:18px;border-left:1.5px solid {LINE}}}
   .shot{{zoom:.566}}
-  .wrap.flip .shot{{zoom:.714}}
+  .wrap.flip .shot{{zoom:.663}}
 }}"""
     return page(body, seed=seed, extra_css=css)
 
@@ -207,7 +208,7 @@ def ledger() -> str:
     return shot_card(
         "02 · Personal finance", "Ledger.m", "Every account, <em>one calm dashboard.</em>",
         "A single-user finance app wired to my real bank accounts through Plaid. Net worth, spending and income "
-        "by category, subscriptions, and what's due next.",
+        "by category, monthly budgets, subscriptions, and what's due next.",
         "Private deploy", False, ["Next.js", "Supabase", "Plaid", "Tailwind"],
         "ledger.png", (49, 110, 1502, 770), flip=False, seed=21, url="ledgerm.vercel.app",
     )
@@ -215,11 +216,11 @@ def ledger() -> str:
 
 def dummy() -> str:
     return shot_card(
-        "03 · E-commerce", "Dummy Peptides", "From catalog to checkout, <em>live.</em>",
+        "03 · E-commerce", "Dummy Peptides", "Catalog to checkout, <em>live.</em>",
         "The storefront for a research-peptide business I co-own: catalog, accounts, cart, and an affiliate "
         "program, with shipping, email, and SMS built in.",
         "Live", True, ["React", "Supabase", "Shippo", "Twilio"],
-        "dummypeptides.png", (49, 110, 1040, 770), flip=True, seed=31, url="dummypeptides.com",
+        "dummypeptides.png", (186, 110, 1244, 770), flip=True, seed=31, url="dummypeptides.com",
     )
 
 
@@ -259,10 +260,30 @@ def cosmo() -> str:
 
 # --- In progress ---------------------------------------------------------------
 
+# Facts from each repo's commit history and status docs (StayDue README, EasyMail PROJECT_STATE.md).
+STAYDUE_LOG = [
+    ("done", "V1 backend: Supabase auth, storage, AI extraction"),
+    ("done", "Dashboard and sign-up redesign"),
+    ("done", "Google sign-in and LMS selection"),
+    ("next", "Private beta"),
+]
+EASYMAIL_LOG = [
+    ("done", "Gmail and Outlook connected"),
+    ("done", "Reliability audit, 8 edge cases fixed"),
+    ("done", "Landing page and motion system"),
+    ("next", "Phase 13: testing"),
+]
+EASYMAIL_PHASE, EASYMAIL_PHASES = 12, 22
+
+
+def log(rows: list[tuple[str, str]]) -> str:
+    return '<div class="log">' + "".join(
+        f'<div class="{kind}"><b>{"" if kind == "done" else "›"}</b>{esc(text)}</div>' for kind, text in rows
+    ) + "</div>"
+
+
 def progress() -> str:
-    cal = "".join(f'<i class="{c}"></i>' for c in
-                  ["", "", "h", "", "", "", "", "", "", "", "", "h2", "", "", "", "", "", "", "", "", "",
-                   "", "", "", "h", "", "", ""])
+    bar = "".join(f'<i class="{"on" if i < EASYMAIL_PHASE else ""}"></i>' for i in range(EASYMAIL_PHASES))
     body = f"""
 <div class="wrap">
   <div class="panel">
@@ -270,23 +291,18 @@ def progress() -> str:
     <div class="title">StayDue</div>
     <div class="tag">Syllabus in. <em>Semester sorted.</em></div>
     <div class="desc">Upload a syllabus PDF, review what it found, and every deadline lands in one dashboard and calendar. Built with a collaborator.</div>
-    <div class="art">
-      <div class="doc"><b>PDF</b><i></i><i></i><i class="s"></i><i></i></div>
-      <div class="arrow">→</div>
-      <div class="cal">{cal}</div>
-    </div>
+    <div class="label">From the commit log</div>
+    {log(STAYDUE_LOG)}
     {pills("Next.js", "Supabase", "OpenAI")}
   </div>
   <div class="panel">
     <div class="top"><span class="status"><span class="dot"></span>In development</span><span class="eyebrow">06</span></div>
     <div class="title">EasyMail</div>
     <div class="tag">Recap first. <em>Inbox second.</em></div>
-    <div class="desc">A cross-inbox attention layer for Gmail and Outlook that shows what needs you before you ever open a mail client.</div>
-    <div class="art mail">
-      <div class="src"><span>Gmail</span><span>Outlook</span></div>
-      <div class="arrow">→</div>
-      <div class="recap"><b>Recap</b><i></i><i class="s"></i><i></i></div>
-    </div>
+    <div class="desc">A cross-inbox attention layer for Gmail and Outlook that shows what needs you before you open a mail client.</div>
+    <div class="label">Phase {EASYMAIL_PHASE} of {EASYMAIL_PHASES} complete</div>
+    <div class="bar">{bar}</div>
+    {log(EASYMAIL_LOG)}
     {pills("Next.js", "Supabase", "Vitest")}
   </div>
 </div>"""
@@ -297,23 +313,20 @@ def progress() -> str:
 .title{{font-size:68px;margin-top:22px}}
 .tag{{font-size:31px}}
 .desc{{font-size:18px;max-width:none}}
-.art{{display:flex;align-items:center;gap:22px;margin-top:28px;height:120px}}
-.arrow{{font-family:'MM Mono';font-size:26px;color:{ACCENT}}}
-.doc{{width:90px;height:116px;border-radius:10px;border:1.5px solid {LINE};background:{RAISED};padding:14px 12px;
-  display:flex;flex-direction:column;gap:9px}}
-.doc b{{font-family:'MM Mono Bold';font-size:12px;letter-spacing:.14em;color:{ACCENT}}}
-.doc i,.recap i{{display:block;height:6px;border-radius:3px;background:#333}}
-.doc i.s,.recap i.s{{width:60%}}
-.cal{{display:grid;grid-template-columns:repeat(7,26px);gap:6px}}
-.cal i{{width:26px;height:26px;border-radius:7px;background:{RAISED};border:1.5px solid {LINE}}}
-.cal i.h{{background:{ACCENT};border-color:{ACCENT}}}
-.cal i.h2{{background:{SIGNAL};border-color:{SIGNAL};box-shadow:0 0 14px rgba(244,240,230,.4)}}
-.src{{display:flex;flex-direction:column;gap:10px}}
-.src span{{font-family:'MM Mono';font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:{SOFT};
-  border:1.5px solid {LINE};border-radius:10px;padding:10px 14px;background:{RAISED}}}
-.recap{{width:210px;border-radius:12px;border:1.5px solid {ACCENT_DIM};background:{RAISED};padding:14px 16px;
-  display:flex;flex-direction:column;gap:10px;box-shadow:0 0 30px rgba(169,180,192,.10)}}
-.recap b{{font-family:'MM Mono Bold';font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:{ACCENT}}}
+.label{{font-family:'MM Mono Bold';font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:{MUTED};
+  margin-top:30px}}
+.bar{{display:grid;grid-template-columns:repeat(22,1fr);gap:4px;margin-top:12px}}
+.bar i{{height:10px;border-radius:2px;background:{RAISED};border:1px solid {LINE}}}
+.bar i.on{{background:{ACCENT};border-color:{ACCENT}}}
+.bar i.on:nth-child(12){{background:{SIGNAL};border-color:{SIGNAL};box-shadow:0 0 12px rgba(244,240,230,.45)}}
+.log{{margin-top:14px;border-top:1.5px solid {LINE}}}
+.log div{{display:flex;align-items:center;gap:14px;padding:11px 0;border-bottom:1.5px solid {LINE};
+  font-family:'MM Mono';font-size:14.5px;color:{SOFT}}}
+.log b{{width:18px;font-weight:400;color:{MUTED};text-align:center;display:grid;place-items:center}}
+.log .done b:before{{content:'';width:5px;height:10px;margin-top:-3px;border:solid {MUTED};border-width:0 1.5px 1.5px 0;transform:rotate(45deg)}}
+.log .next{{color:{TEXT}}}
+.log .next b{{color:{ACCENT}}}
+.bar + .log{{margin-top:18px}}
 @media (max-width:700px){{
   .wrap{{flex-direction:column;padding:20px;gap:20px;height:auto}}
   .panel{{flex:none}}
@@ -327,9 +340,9 @@ def progress() -> str:
 CARDS = {
     "imperium": (imperium, 740, 1210),
     "ledger": (ledger, 620, 790),
-    "dummypeptides": (dummy, 620, 960),
+    "dummypeptides": (dummy, 660, 960),
     "cosmo": (cosmo, 680, 960),
-    "progress": (progress, 620, 1110),
+    "progress": (progress, 680, 1400),
 }
 
 
