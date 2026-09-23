@@ -189,4 +189,5 @@ def render(html: str, out: Path, width: int, height: int, scale: int = 2, qualit
 def write(out: Path, content: str) -> None:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(content)
-    print(f"wrote {out.relative_to(ROOT)} ({len(content) // 1024} KB)")
+    shown = out.resolve().relative_to(ROOT) if out.resolve().is_relative_to(ROOT) else out
+    print(f"wrote {shown} ({len(content) // 1024} KB)")

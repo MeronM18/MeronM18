@@ -1,6 +1,6 @@
 # Design direction
 
-**Quiet money after dark.** Near-black graphite, bone-white type, one cold steel accent, a script signature for the name and a high-contrast Didone for everything titled. It should read like a private dossier: ruled paper, corner registration marks, coordinates instead of a city name. The screenshots are the only saturated color on the page. The palette lives in `scripts/brand.py`, which every generator imports.
+**Quiet money after dark.** Near-black graphite, bone-white type, one cold steel accent, a script signature for the name and a high-contrast Didone for everything titled. It should read like a private dossier: ruled paper, corner registration marks, coordinates instead of a city name. Even the screenshots are toned toward steel. The palette lives in `scripts/brand.py`, which every generator imports.
 
 ## Type
 
@@ -61,9 +61,9 @@ python3 -m venv .venv && .venv/bin/pip install fonttools pillow uharfbuzz
 .venv/bin/python scripts/preview.py       # README in light/dark/phone, into .preview/
 ```
 
-Cards need Google Chrome. Live-site screenshots live in `scripts/shots/`; the Ledger.m one has its dollar amounts blanked.
+Cards need Google Chrome. Live-site screenshots live in `scripts/shots/`; the Ledger.m one has its dollar amounts blanked. Bright screenshots get `tone=True` in `cards.py`, a steel duotone (grayscale, dimmed, steel tint) so they sit in the monochrome page. Dummy Peptides uses it.
 
-The contribution snake is drawn by `.github/workflows/snake.yml` (Platane/snk) in greyscale every 12 hours and pushed to the `output` branch.
+`.github/workflows/profile.yml` runs every 3 hours and on every push to main. It rebuilds the hero with a live **Now building** list (`scripts/now.py`: my two most recently pushed public repos from the last 21 days, excluding this repo, forks, templates and archived repos, with EasyMail · StayDue as the fallback), draws the contribution snake in greyscale, and publishes both to the `output` branch. The README loads the hero from there, so main never gets automated commits. `assets/header.svg` is the local copy.
 
 ## Still building
 
@@ -72,7 +72,7 @@ The in-progress card is built from each repo's commit history and status docs: S
 ## Do
 
 - Put the facts in the markdown too (alt text and link lines), so the page works without images.
-- Keep one idea per card and let the screenshots carry the color.
+- Keep one idea per card. Tone bright screenshots down to steel rather than letting them break the palette.
 - Use steel sparingly. If two things are steel on one card, one of them shouldn't be.
 
 ## Don't

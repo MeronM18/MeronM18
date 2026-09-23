@@ -9,5 +9,6 @@ import header
 import sections
 import stack
 
-for module in (header, sections, cards, stack, footer):
+header.main(["--live"])  # falls back to a fixed list offline
+for module in (sections, cards, stack, footer):
     module.main()

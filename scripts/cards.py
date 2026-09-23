@@ -164,7 +164,9 @@ def imperium() -> str:
 # --- Screenshot cards -------------------------------------------------------
 
 def shot_card(eyebrow: str, title: str, tag: str, desc: str, status: str, live: bool, tags: list[str],
-              shot: str, crop: tuple[int, int, int, int], flip: bool, seed: int, url: str) -> str:
+              shot: str, crop: tuple[int, int, int, int], flip: bool, seed: int, url: str,
+              tone: bool = False) -> str:
+    """`tone` turns a bright screenshot into a steel duotone so it sits in the monochrome page."""
     text = f"""
   <div class="text">
     <div class="eyebrow">{eyebrow}</div>
@@ -179,7 +181,8 @@ def shot_card(eyebrow: str, title: str, tag: str, desc: str, status: str, live: 
     <div class="chrome"><i></i><i></i><i></i><span>{esc(url)}</span></div>
     {screenshot(shot, crop, 700 if flip else 820)}
   </div>"""
-    body = f'<div class="wrap{" flip" if flip else ""}">{visual + text if flip else text + visual}</div>'
+    body = (f'<div class="wrap{" flip" if flip else ""}{" toned" if tone else ""}">'
+            f'{visual + text if flip else text + visual}</div>')
     css = f"""
 .wrap{{position:relative;display:flex;gap:56px;height:100%;padding:64px 0 0 64px}}
 .wrap.flip{{padding:64px 64px 0 0;gap:44px}}
@@ -190,6 +193,9 @@ def shot_card(eyebrow: str, title: str, tag: str, desc: str, status: str, live: 
 .wrap:not(.flip) .visual{{border-top-right-radius:0;border-right:none}}
 .wrap.flip .visual{{width:700px;border-top-left-radius:0;border-left:none}}
 .meta{{display:flex;flex-direction:column;gap:10px;margin-top:26px}}
+.toned .shot img{{filter:grayscale(1) brightness(.74) contrast(1.18)}}
+.toned .shot:after{{content:'';position:absolute;inset:0;background:linear-gradient(160deg,rgba(169,180,192,.30),rgba(10,10,10,.28));mix-blend-mode:multiply}}
+.toned .shot:before{{content:'';position:absolute;inset:0;z-index:1;background:{ACCENT};mix-blend-mode:color;opacity:.22}}
 .url{{font-family:'MM Mono';font-size:14px;letter-spacing:.06em;color:{MUTED}}}
 @media (max-width:700px){{
   .wrap,.wrap.flip{{flex-direction:column;gap:40px;padding:44px 36px 0}}
@@ -220,7 +226,7 @@ def dummy() -> str:
         "The storefront for a research-peptide business I co-own: catalog, accounts, cart, and an affiliate "
         "program, with shipping, email, and SMS built in.",
         "Live", True, ["React", "Supabase", "Shippo", "Twilio"],
-        "dummypeptides.png", (186, 110, 1244, 770), flip=True, seed=31, url="dummypeptides.com",
+        "dummypeptides.png", (186, 110, 1244, 770), flip=True, seed=31, url="dummypeptides.com", tone=True,
     )
 
 

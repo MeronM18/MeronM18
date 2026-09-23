@@ -1,6 +1,6 @@
 <picture>
-  <source media="(max-width: 600px)" srcset="./assets/header-phone.svg" />
-  <img src="./assets/header.svg" width="100%" alt="Meron Matti, written in script. Full-stack and indie developer. I build things for fun, then I ship them; agents that run my Mac from my phone; finance apps wired to real bank accounts; storefronts that ship real orders; iOS apps with paid subscriptions. Computer Science at Oakland University, class of 2027. Now building EasyMail and StayDue." />
+  <source media="(max-width: 600px)" srcset="https://raw.githubusercontent.com/MeronM18/MeronM18/output/header-phone.svg" />
+  <img src="https://raw.githubusercontent.com/MeronM18/MeronM18/output/header.svg" width="100%" alt="Meron Matti, written in script. Full-stack and indie developer. I build things for fun, then I ship them; agents that run my Mac from my phone; finance apps wired to real bank accounts; storefronts that ship real orders; iOS apps with paid subscriptions. Computer Science at Oakland University, class of 2027. Now building: my most recently pushed public repos, updated every 3 hours." />
 </picture>
 
 <p align="center">

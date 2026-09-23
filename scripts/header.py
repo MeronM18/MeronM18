@@ -18,7 +18,7 @@ PHRASES = [
 ]
 ABOUT = "Computer Science at Oakland University, class of 2027."
 NOW = "NOW BUILDING"
-NOW_ITEMS = "EASYMAIL · STAYDUE"
+NOW_ITEMS = "EASYMAIL · STAYDUE"  # replaced by the live list when built with --live (see now.py)
 
 # Typing rhythm, in seconds.
 TYPE, HOLD, DELETE, GAP = 0.055, 2.4, 0.022, 0.4
@@ -143,9 +143,12 @@ def typing(x: float, y: float, size: float, uid: str) -> str:
     return f"<defs>{''.join(defs)}</defs>" + "".join(out)
 
 
-def now_chip(x: float, y: float, size: float, anchor_end: bool = False) -> str:
+def now_chip(x: float, y: float, size: float, anchor_end: bool = False, max_w: float = 1e9) -> str:
     label_w = measure(NOW, "monobold", size, 2.4)
-    items_w = measure(NOW_ITEMS, "mono", size, 2.4)
+    items = NOW_ITEMS
+    if 26 + label_w + 16 + measure(items, "mono", size, 2.4) > max_w:  # too long: keep the latest repo only
+        items = items.split(" · ")[0]
+    items_w = measure(items, "mono", size, 2.4)
     w = 26 + label_w + 16 + items_w
     x0 = x - w if anchor_end else x
     cy = y - size * 0.36
@@ -154,12 +157,13 @@ def now_chip(x: float, y: float, size: float, anchor_end: bool = False) -> str:
             f'<text x="{x0 + 26:.1f}" y="{y}" font-family="MM Mono Bold" font-size="{size}" letter-spacing="2.4" '
             f'fill="{TEXT}">{NOW}</text>'
             f'<text x="{x0 + 26 + label_w + 16:.1f}" y="{y}" font-family="MM Mono" font-size="{size}" '
-            f'letter-spacing="2.4" fill="{ACCENT}">{NOW_ITEMS}</text>')
+            f'letter-spacing="2.4" fill="{ACCENT}">{esc(items)}</text>')
 
 
 def svg(w: int, h: int, body: str) -> str:
+    now = " and ".join(n.title() for n in NOW_ITEMS.split(" · "))
     desc = (f"Meron Matti, full-stack and indie developer. I build {PHRASES[0]} Also: "
-            + "; ".join(p.rstrip(".") for p in PHRASES[1:]) + f". {ABOUT} Now building EasyMail and StayDue.")
+            + "; ".join(p.rstrip(".") for p in PHRASES[1:]) + f". {ABOUT} Now building {now}.")
     return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" '
             f'aria-labelledby="t d"><title id="t">Meron Matti</title><desc id="d">{esc(desc)}</desc>'
             f"<style>{fonts()}{MOTION}</style>{backdrop(w, h)}{body}</svg>")
@@ -181,7 +185,7 @@ def desktop() -> str:
 <text x="{pad}" y="{type_y}" font-family="MM Mono" font-size="{mono}" fill="{MUTED}"><tspan fill="{ACCENT}">›</tspan>{esc(PREFIX[1:])}</text>
 {typing(pad + prefix_w, type_y, mono, "tw")}
 {outline(ABOUT, "body", 18, pad, h - 64, SOFT)}
-{now_chip(w - pad, h - 64, 13.5, anchor_end=True)}"""
+{now_chip(w - pad, h - 64, 13.5, anchor_end=True, max_w=560)}"""
     return svg(w, h, body)
 
 
@@ -203,14 +207,25 @@ def phone() -> str:
 {typing(pad, rule_y + 96, mono, "tp")}
 {outline("Computer Science at Oakland University,", "body", 21, pad, h - 138, SOFT)}
 {outline("class of 2027.", "body", 21, pad, h - 108, SOFT)}
-{now_chip(pad, h - 58, 15)}"""
+{now_chip(pad, h - 58, 15, max_w=w - 2 * pad)}"""
     return svg(w, h, body)
 
 
-def main() -> None:
-    write(ASSETS / "header.svg", desktop())
-    write(ASSETS / "header-phone.svg", phone())
+def main(argv: list[str] | None = None) -> None:
+    """--live pulls the "now building" repos from GitHub; --out DIR writes somewhere other than assets/."""
+    from pathlib import Path
+
+    global NOW_ITEMS
+    argv = argv or []
+    out = Path(argv[argv.index("--out") + 1]) if "--out" in argv else ASSETS
+    if "--live" in argv:
+        from now import now_building
+        NOW_ITEMS = " · ".join(now_building())
+        print(f"now building: {NOW_ITEMS}")
+    write(out / "header.svg", desktop())
+    write(out / "header-phone.svg", phone())
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    main(sys.argv[1:])
