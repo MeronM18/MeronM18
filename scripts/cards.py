@@ -6,19 +6,16 @@ phone layout (picked by a CSS media query), both at high DPI.
 
 from __future__ import annotations
 
-from brand import (ASSETS, INK, LINE, MUTED, PANEL, RAISED, SHOTS, SOFT, TEXT, VIOLET, VIOLET_DIM, VOLT,
-                   esc, font_files_css, render, stars)
+from brand import (ASSETS, INK, LINE, MUTED, PANEL, RAISED, SHOTS, SOFT, TEXT, ACCENT, ACCENT_DIM, SIGNAL,
+                   esc, font_files_css, render)
 
 DESKTOP_W = 1200
 PHONE_W = 500
 
 
-def starfield(seed: int, n: int = 70) -> str:
-    dots = "".join(
-        f'<circle cx="{x:.0f}" cy="{y:.0f}" r="{r}" fill="#fff" opacity="{o * 0.55:.2f}"/>'
-        for x, y, r, o in stars(n, 1200, 1400, seed)
-    )
-    return f'<svg class="stars" viewBox="0 0 1200 1400" preserveAspectRatio="xMidYMin slice">{dots}</svg>'
+def starfield(seed: int, n: int = 0) -> str:
+    """Faint registration ticks in the corners: a dossier, not a sky."""
+    return '<div class="ticks"><i></i><i></i></div>'
 
 
 CSS = f"""
@@ -27,41 +24,45 @@ CSS = f"""
 html,body{{background:transparent;width:100%;height:100%}}
 .card{{position:relative;width:100vw;height:100vh;border-radius:28px;overflow:hidden;color:{TEXT};
   font-family:'MM Body';border:1.5px solid {LINE};
-  background:radial-gradient(900px 520px at 88% -10%,rgba(169,148,255,.20),transparent 60%),
-             radial-gradient(700px 500px at -10% 120%,rgba(107,88,214,.16),transparent 60%),{INK}}}
-.stars{{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}}
-.grain{{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px);
+  background:radial-gradient(900px 560px at 8% -20%,rgba(255,255,255,.075),transparent 62%),
+             radial-gradient(800px 520px at 105% 115%,rgba(169,180,192,.07),transparent 60%),{INK}}}
+.ticks i{{position:absolute;width:14px;height:14px;border-color:#3a3a3a;border-style:solid;border-width:0}}
+.ticks i:nth-child(1){{left:22px;top:22px;border-left-width:1.5px;border-top-width:1.5px}}
+.ticks i:nth-child(2){{right:22px;top:22px;border-right-width:1.5px;border-top-width:1.5px}}
+.ticks i:nth-child(3){{left:22px;bottom:22px;border-left-width:1.5px;border-bottom-width:1.5px}}
+.ticks i:nth-child(4){{right:22px;bottom:22px;border-right-width:1.5px;border-bottom-width:1.5px}}
+.grain{{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.014) 1px,transparent 1px);
   background-size:100% 44px;pointer-events:none}}
-.eyebrow{{font-family:'MM Mono Bold';font-size:15px;letter-spacing:.24em;text-transform:uppercase;color:{VIOLET}}}
-.title{{font-family:'MM Display';font-size:104px;letter-spacing:-.035em;line-height:.95;margin-top:22px}}
-.tag{{font-family:'MM Serif';font-size:38px;line-height:1.1;color:{SOFT};margin-top:14px}}
-.tag em{{font-style:normal;color:{VIOLET}}}
+.eyebrow{{font-family:'MM Mono Bold';font-size:15px;letter-spacing:.24em;text-transform:uppercase;color:{ACCENT}}}
+.title{{font-family:'MM Display';font-size:104px;letter-spacing:-.02em;line-height:.98;margin-top:22px}}
+.tag{{font-family:'MM Serif';font-size:33px;line-height:1.15;color:{SOFT};margin-top:14px}}
+.tag em{{font-style:normal;color:{ACCENT}}}
 .desc{{font-size:20px;line-height:1.55;color:{SOFT};margin-top:22px;max-width:520px}}
 .pills{{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}}
 .pill{{font-family:'MM Mono';font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:{SOFT};
   border:1.5px solid {LINE};border-radius:999px;padding:9px 16px;background:rgba(255,255,255,.02)}}
 .status{{display:inline-flex;align-items:center;gap:10px;font-family:'MM Mono Bold';font-size:14px;
   letter-spacing:.22em;text-transform:uppercase;color:{SOFT}}}
-.dot{{width:10px;height:10px;border-radius:50%;background:{VIOLET};box-shadow:0 0 0 5px rgba(169,148,255,.15)}}
-.dot.live{{background:{VOLT};box-shadow:0 0 0 5px rgba(212,255,79,.16),0 0 18px rgba(212,255,79,.5)}}
+.dot{{width:10px;height:10px;border-radius:50%;background:{ACCENT};box-shadow:0 0 0 5px rgba(169,180,192,.14)}}
+.dot.live{{background:{SIGNAL};box-shadow:0 0 0 5px rgba(244,240,230,.14),0 0 18px rgba(244,240,230,.55)}}
 .stats{{display:flex;gap:48px;margin-top:30px}}
-.stat .n{{font-family:'MM Display';font-size:58px;letter-spacing:-.03em;line-height:1;color:{TEXT}}}
-.stat .n.v{{color:{VIOLET}}}
+.stat .n{{font-family:'MM Display';font-size:64px;letter-spacing:-.01em;line-height:1;color:{TEXT}}}
+.stat .n.v{{color:{ACCENT}}}
 .stat .l{{font-family:'MM Mono';font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:{MUTED};
   margin-top:10px;line-height:1.6}}
 .window{{border-radius:18px;border:1.5px solid {LINE};background:{PANEL};overflow:hidden;
-  box-shadow:0 40px 90px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.02),0 0 120px rgba(169,148,255,.12)}}
+  box-shadow:0 40px 90px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.02),0 0 120px rgba(255,255,255,.05)}}
 .chrome{{display:flex;align-items:center;gap:8px;height:48px;padding:0 18px;border-bottom:1.5px solid {LINE};
   background:{RAISED};font-family:'MM Mono';font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:{MUTED}}}
-.chrome i{{width:11px;height:11px;border-radius:50%;background:#3a3a48;display:block}}
-.chrome i:first-child{{background:{VIOLET}}}
+.chrome i{{width:11px;height:11px;border-radius:50%;background:#333;display:block}}
+.chrome i:first-child{{background:{ACCENT}}}
 .chrome span{{margin-left:12px}}
 .shot{{position:relative;overflow:hidden;background:#000}}
 .shot img{{position:absolute;display:block}}
 @media (max-width:700px){{
   .card{{border-radius:22px}}
   .title{{font-size:76px}}
-  .tag{{font-size:31px}}
+  .tag{{font-size:28px}}
   .desc{{font-size:19px;max-width:none}}
   .pill{{font-size:14px;padding:9px 15px}}
   .eyebrow{{font-size:15px}}
@@ -138,15 +139,15 @@ def imperium() -> str:
   border-right:none;border-bottom:none;border-top-right-radius:0}}
 .inner{{padding:30px 34px}}
 .from{{font-family:'MM Mono';font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:{MUTED};text-align:right}}
-.bubble{{margin:12px 0 0 auto;width:max-content;max-width:80%;background:{VIOLET};color:#120f24;font-size:21px;
+.bubble{{margin:12px 0 0 auto;width:max-content;max-width:80%;background:{TEXT};color:{INK};font-size:21px;
   padding:14px 20px;border-radius:20px 20px 6px 20px;font-family:'MM Body Bold'}}
 .trace{{position:relative;margin-top:30px;padding-left:4px}}
 .trace:before{{content:"";position:absolute;left:13px;top:14px;bottom:14px;width:1.5px;
-  background:linear-gradient({VIOLET},{VIOLET_DIM} 70%,{VOLT})}}
+  background:linear-gradient({ACCENT},{ACCENT_DIM} 70%,{SIGNAL})}}
 .row{{position:relative;display:flex;align-items:center;gap:16px;height:52px;font-family:'MM Mono';font-size:15.5px}}
 .row b{{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px;flex:none;
-  background:{PANEL};border:1.5px solid {VIOLET};color:{VIOLET};margin-left:0}}
-.row b.run{{border-color:{VOLT};color:{VOLT};box-shadow:0 0 16px rgba(212,255,79,.45)}}
+  background:{PANEL};border:1.5px solid {ACCENT};color:{ACCENT};margin-left:0}}
+.row b.run{{border-color:{SIGNAL};color:{SIGNAL};box-shadow:0 0 16px rgba(244,240,230,.4)}}
 .row .k{{width:74px;color:{TEXT};letter-spacing:.12em;font-family:'MM Mono Bold';font-size:14px}}
 .row .v{{color:{SOFT};white-space:nowrap}}
 .audit{{display:flex;align-items:center;gap:12px;margin-top:26px;padding:14px 18px;border:1.5px dashed {LINE};
@@ -239,14 +240,14 @@ def cosmo() -> str:
   <img class="phone" src="{phone}">
 </div>"""
     css = f"""
-.card{{background:radial-gradient(620px 620px at 78% 42%,rgba(126,96,255,.34),transparent 65%),
-  radial-gradient(900px 500px at 0% 110%,rgba(107,88,214,.18),transparent 60%),#0B0918}}
+.card{{background:radial-gradient(620px 620px at 78% 42%,rgba(255,255,255,.09),transparent 65%),
+  radial-gradient(900px 500px at 0% 110%,rgba(169,180,192,.06),transparent 60%),{INK}}}
 .wrap{{position:relative;display:flex;align-items:center;gap:40px;height:100%;padding:0 40px 0 64px}}
 .text{{width:560px;flex:none}}
 .phone{{height:660px;margin:0 0 0 70px;filter:drop-shadow(0 40px 60px rgba(0,0,0,.6))}}
-.orbit{{position:absolute;border:1.5px solid rgba(169,148,255,.18);border-radius:50%}}
+.orbit{{position:absolute;border:1.5px solid rgba(255,255,255,.10);border-radius:50%}}
 .o1{{width:560px;height:560px;left:672px;top:26px}}
-.o2{{width:760px;height:760px;left:572px;top:-74px;border-style:dashed;border-color:rgba(169,148,255,.12)}}
+.o2{{width:760px;height:760px;left:572px;top:-74px;border-style:dashed;border-color:rgba(255,255,255,.07)}}
 @media (max-width:700px){{
   .wrap{{flex-direction:column;align-items:flex-start;padding:44px 36px 0;gap:30px}}
   .text{{width:auto}}
@@ -291,28 +292,28 @@ def progress() -> str:
 </div>"""
     css = f"""
 .wrap{{position:relative;display:flex;gap:28px;height:100%;padding:28px}}
-.panel{{flex:1;border:1.5px solid {LINE};border-radius:20px;background:rgba(18,18,26,.72);padding:36px 38px}}
+.panel{{flex:1;border:1.5px solid {LINE};border-radius:20px;background:rgba(17,17,17,.72);padding:36px 38px}}
 .top{{display:flex;justify-content:space-between;align-items:center}}
 .title{{font-size:68px;margin-top:22px}}
 .tag{{font-size:31px}}
 .desc{{font-size:18px;max-width:none}}
 .art{{display:flex;align-items:center;gap:22px;margin-top:28px;height:120px}}
-.arrow{{font-family:'MM Mono';font-size:26px;color:{VIOLET}}}
+.arrow{{font-family:'MM Mono';font-size:26px;color:{ACCENT}}}
 .doc{{width:90px;height:116px;border-radius:10px;border:1.5px solid {LINE};background:{RAISED};padding:14px 12px;
   display:flex;flex-direction:column;gap:9px}}
-.doc b{{font-family:'MM Mono Bold';font-size:12px;letter-spacing:.14em;color:{VIOLET}}}
-.doc i,.recap i{{display:block;height:6px;border-radius:3px;background:#34344a}}
+.doc b{{font-family:'MM Mono Bold';font-size:12px;letter-spacing:.14em;color:{ACCENT}}}
+.doc i,.recap i{{display:block;height:6px;border-radius:3px;background:#333}}
 .doc i.s,.recap i.s{{width:60%}}
 .cal{{display:grid;grid-template-columns:repeat(7,26px);gap:6px}}
 .cal i{{width:26px;height:26px;border-radius:7px;background:{RAISED};border:1.5px solid {LINE}}}
-.cal i.h{{background:{VIOLET};border-color:{VIOLET}}}
-.cal i.h2{{background:{VOLT};border-color:{VOLT};box-shadow:0 0 14px rgba(212,255,79,.45)}}
+.cal i.h{{background:{ACCENT};border-color:{ACCENT}}}
+.cal i.h2{{background:{SIGNAL};border-color:{SIGNAL};box-shadow:0 0 14px rgba(244,240,230,.4)}}
 .src{{display:flex;flex-direction:column;gap:10px}}
 .src span{{font-family:'MM Mono';font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:{SOFT};
   border:1.5px solid {LINE};border-radius:10px;padding:10px 14px;background:{RAISED}}}
-.recap{{width:210px;border-radius:12px;border:1.5px solid {VIOLET_DIM};background:{RAISED};padding:14px 16px;
-  display:flex;flex-direction:column;gap:10px;box-shadow:0 0 30px rgba(169,148,255,.15)}}
-.recap b{{font-family:'MM Mono Bold';font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:{VIOLET}}}
+.recap{{width:210px;border-radius:12px;border:1.5px solid {ACCENT_DIM};background:{RAISED};padding:14px 16px;
+  display:flex;flex-direction:column;gap:10px;box-shadow:0 0 30px rgba(169,180,192,.10)}}
+.recap b{{font-family:'MM Mono Bold';font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:{ACCENT}}}
 @media (max-width:700px){{
   .wrap{{flex-direction:column;padding:20px;gap:20px;height:auto}}
   .panel{{flex:none}}
@@ -324,7 +325,7 @@ def progress() -> str:
 
 
 CARDS = {
-    "imperium": (imperium, 700, 1190),
+    "imperium": (imperium, 740, 1210),
     "ledger": (ledger, 620, 790),
     "dummypeptides": (dummy, 620, 960),
     "cosmo": (cosmo, 680, 960),

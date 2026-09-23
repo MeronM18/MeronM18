@@ -15,13 +15,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      # Colors follow DESIGN.md: violet dots on midnight for dark, deep violet on white for light.
+      # Colors follow DESIGN.md: graphite-to-bone for dark, grey-to-ink for light.
       - uses: Platane/snk@v3
         with:
           github_user_name: ${{ github.repository_owner }}
           outputs: |
-            dist/snake-dark.svg?palette=github-dark&color_snake=#D4FF4F&color_dots=#161B22,#2B2452,#4A3B9C,#7A66E0,#A994FF
-            dist/snake-light.svg?color_snake=#5A3FD9&color_dots=#EBEDF0,#DCD5FF,#B7A8FF,#8B75F5,#5A3FD9
+            dist/snake-dark.svg?palette=github-dark&color_snake=#F4F0E6&color_dots=#161B22,#2A2D31,#4C535B,#8A95A1,#D5DCE3
+            dist/snake-light.svg?color_snake=#111111&color_dots=#EBEDF0,#CDD2D8,#9AA3AD,#5E6873,#1F262E
 
       - uses: crazy-max/ghaction-github-pages@v4
         with:

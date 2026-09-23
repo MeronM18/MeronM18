@@ -2,3 +2,5 @@ scripts/.fonts/
 .venv/
 __pycache__/
 .preview/
+scripts/fonts/body.ttf
+scripts/fonts/bodybold.ttf

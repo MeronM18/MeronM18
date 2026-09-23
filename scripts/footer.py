@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from brand import (ASSETS, INK, LINE, MUTED, PANEL, SOFT, TEXT, VIOLET, VOLT, esc, font_css, measure, stars,
+from brand import (ASSETS, INK, LINE, MUTED, PANEL, SOFT, TEXT, ACCENT, SIGNAL, esc, font_css, measure,
                    write)
 
 LINE_A = "Got an idea worth shipping?"
@@ -18,41 +18,38 @@ BUTTONS = {
 }
 
 MOTION = (
-    "@keyframes tw{0%,100%{opacity:1}50%{opacity:.3}}.tw{animation:tw 3.6s ease-in-out infinite}"
-    "@keyframes pulse{0%,100%{opacity:.9}50%{opacity:.35}}.pulse{animation:pulse 2.4s ease-in-out infinite}"
-    "@media (prefers-reduced-motion:reduce){.tw,.pulse{animation:none}}"
+        "@keyframes pulse{0%,100%{opacity:.9}50%{opacity:.35}}.pulse{animation:pulse 2.4s ease-in-out infinite}"
+    "@media (prefers-reduced-motion:reduce){.pulse{animation:none}}"
 )
 
 
 def backdrop(w: int, h: int, seed: int) -> str:
-    twinkle = ' class="tw"'
-    field = "".join(
-        f'<circle cx="{x:.0f}" cy="{y:.0f}" r="{r}" fill="#fff" opacity="{o * 0.55:.2f}"'
-        f'{twinkle if i % 5 == 0 else ""}/>'
-        for i, (x, y, r, o) in enumerate(stars(60, w, h, seed))
+    ticks = "".join(
+        f'<path d="M{x} {y + dy * 16}V{y}H{x + dx * 16}" fill="none" stroke="#3A3A3A" stroke-width="1.5"/>'
+        for x, y, dx, dy in ((24, 24, 1, 1), (w - 24, 24, -1, 1), (24, h - 24, 1, -1), (w - 24, h - 24, -1, -1))
     )
     return f"""
 <defs>
-  <radialGradient id="g1" cx="0.5" cy="1.15" r="0.8">
-    <stop offset="0" stop-color="{VIOLET}" stop-opacity="0.30"/><stop offset="1" stop-color="{VIOLET}" stop-opacity="0"/>
+  <radialGradient id="g1" cx="0.5" cy="-0.2" r="0.85">
+    <stop offset="0" stop-color="#fff" stop-opacity="0.09"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
   </radialGradient>
   <clipPath id="frame"><rect width="{w}" height="{h}" rx="28"/></clipPath>
 </defs>
 <g clip-path="url(#frame)">
   <rect width="{w}" height="{h}" fill="{INK}"/>
   <rect width="{w}" height="{h}" fill="url(#g1)"/>
-  {field}
 </g>
+{ticks}
 <rect x="0.75" y="0.75" width="{w - 1.5}" height="{h - 1.5}" rx="27.25" fill="none" stroke="{LINE}" stroke-width="1.5"/>"""
 
 
 def kicker(cx: float, y: float, size: float) -> str:
     w = measure(KICKER, "monobold", size, 4)
     x = cx - (w + 34) / 2
-    return (f'<circle cx="{x + 8}" cy="{y - size * 0.36:.1f}" r="{size * 0.9:.1f}" fill="{VOLT}" opacity="0.18" class="pulse"/>'
-            f'<circle cx="{x + 8}" cy="{y - size * 0.36:.1f}" r="{size * 0.36:.1f}" fill="{VOLT}"/>'
+    return (f'<circle cx="{x + 8}" cy="{y - size * 0.36:.1f}" r="{size * 0.9:.1f}" fill="{SIGNAL}" opacity="0.18" class="pulse"/>'
+            f'<circle cx="{x + 8}" cy="{y - size * 0.36:.1f}" r="{size * 0.36:.1f}" fill="{SIGNAL}"/>'
             f'<text x="{x + 34:.1f}" y="{y}" font-family="MM Mono Bold" font-size="{size}" letter-spacing="4" '
-            f'fill="{VIOLET}">{KICKER}</text>')
+            f'fill="{ACCENT}">{KICKER}</text>')
 
 
 def card(w: int, h: int, body: str, seed: int) -> str:
@@ -67,8 +64,8 @@ def desktop() -> str:
     w, h = 1200, 400
     body = f"""
 {kicker(w / 2, 100, 15)}
-<text x="{w / 2}" y="190" text-anchor="middle" font-family="MM Display" font-size="68" letter-spacing="-2" fill="{TEXT}">{esc(LINE_A)}</text>
-<text x="{w / 2}" y="258" text-anchor="middle" font-family="MM Serif" font-size="64" fill="{VIOLET}">{esc(LINE_B)}</text>
+<text x="{w / 2}" y="190" text-anchor="middle" font-family="MM Display" font-size="70" letter-spacing="-0.5" fill="{TEXT}">{esc(LINE_A)}</text>
+<text x="{w / 2}" y="258" text-anchor="middle" font-family="MM Serif" font-size="64" fill="{ACCENT}">{esc(LINE_B)}</text>
 <text x="{w / 2}" y="336" text-anchor="middle" font-family="MM Mono" font-size="14" letter-spacing="2.4" fill="{MUTED}">{esc(SIGN)}</text>"""
     return card(w, h, body, seed=61)
 
@@ -77,9 +74,9 @@ def phone() -> str:
     w, h = 600, 520
     body = f"""
 {kicker(w / 2, 96, 17)}
-<text x="{w / 2}" y="190" text-anchor="middle" font-family="MM Display" font-size="58" letter-spacing="-1.8" fill="{TEXT}">Got an idea</text>
-<text x="{w / 2}" y="256" text-anchor="middle" font-family="MM Display" font-size="58" letter-spacing="-1.8" fill="{TEXT}">worth shipping?</text>
-<text x="{w / 2}" y="340" text-anchor="middle" font-family="MM Serif" font-size="64" fill="{VIOLET}">{esc(LINE_B)}</text>
+<text x="{w / 2}" y="190" text-anchor="middle" font-family="MM Display" font-size="60" letter-spacing="-0.5" fill="{TEXT}">Got an idea</text>
+<text x="{w / 2}" y="256" text-anchor="middle" font-family="MM Display" font-size="60" letter-spacing="-0.5" fill="{TEXT}">worth shipping?</text>
+<text x="{w / 2}" y="340" text-anchor="middle" font-family="MM Serif" font-size="64" fill="{ACCENT}">{esc(LINE_B)}</text>
 <text x="{w / 2}" y="432" text-anchor="middle" font-family="MM Mono" font-size="16" letter-spacing="2" fill="{MUTED}">THANKS FOR STOPPING BY</text>"""
     return card(w, h, body, seed=63)
 
@@ -102,7 +99,7 @@ def button(key: str, label: str) -> str:
     size, h = 17, 60
     tw = measure(label.upper(), "monobold", size, 2.4)
     w = int(28 + 24 + 14 + tw + 30)
-    glyph = GLYPHS[key].format(c=VIOLET)
+    glyph = GLYPHS[key].format(c=ACCENT)
     return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" '
             f'aria-label="{esc(label)}"><title>{esc(label)}</title>'
             f'<style>{font_css(monobold=label.upper())}</style>'

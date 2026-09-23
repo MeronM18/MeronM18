@@ -1,147 +1,182 @@
-"""Animated header: name, tagline and a constellation of projects (desktop + phone)."""
+"""Animated hero: masthead name, a typing line that cycles through what I build (desktop + phone)."""
 
 from __future__ import annotations
 
-from brand import (ASSETS, INK, LINE, MUTED, SOFT, TEXT, VIOLET, VOLT, esc, font_css, measure, stars,
+from brand import (ACCENT, ASSETS, INK, LINE, MUTED, SIGNAL, SOFT, TEXT, esc, font_css, measure, outline,
                    write)
 
-NAME = "Meron Matti"
+NAME = "MERON MATTI"
 ROLE = "FULL-STACK · INDIE DEVELOPER"
-TAG_A = "I build things for fun, "
-TAG_B = "then I ship them."
-META = "OAKLAND UNIVERSITY · B.S. COMPUTER SCIENCE · MAY 2027 · MICHIGAN"
-NOW = "NOW BUILDING"
-NOW_ITEMS = "EasyMail · StayDue"
-
-# Constellation nodes: (label, x, y, bright, label anchor, label dx, label dy), in a 340x300 box.
-NODES = [
-    ("Imperium", 170, 40, True, "start", 16, 5),
-    ("Ledger.m", 40, 118, False, "start", -4, -16),
-    ("Cosmo", 300, 104, True, "end", -16, -12),
-    ("Dummy Peptides", 104, 212, True, "start", -40, 30),
-    ("StayDue", 256, 222, False, "start", 16, 5),
-    ("EasyMail", 196, 292, False, "start", 16, 5),
+COORDS = "42.67° N · 83.22° W"
+PREFIX = "› I build "
+PHRASES = [
+    "things for fun, then I ship them.",
+    "agents that run my Mac from my phone.",
+    "finance apps wired to real bank accounts.",
+    "storefronts that ship real orders.",
+    "iOS apps with paid subscriptions.",
 ]
-EDGES = [(0, 1), (0, 2), (1, 3), (2, 4), (3, 4), (4, 5), (3, 5), (0, 3)]
+ABOUT = "Computer Science at Oakland University, class of 2027."
+NOW = "NOW BUILDING"
+NOW_ITEMS = "EASYMAIL · STAYDUE"
 
-# Twinkles and a slow orbit. Every element is fully drawn without CSS; motion only
-# dims and brightens it, so a frozen frame is complete.
+# Typing rhythm, in seconds.
+TYPE, HOLD, DELETE, GAP = 0.055, 2.4, 0.022, 0.4
+
 MOTION = (
-    "@keyframes tw{0%,100%{opacity:1}50%{opacity:.3}}"
-    ".tw{animation:tw 3.6s ease-in-out infinite}"
-    "@keyframes spin{to{transform:rotate(360deg)}}"
-    ".orbit{animation:spin 80s linear infinite}"
-    "@keyframes pulse{0%,100%{opacity:.9}50%{opacity:.35}}"
-    ".pulse{animation:pulse 2.4s ease-in-out infinite}"
-    "@media (prefers-reduced-motion:reduce){.tw,.orbit,.pulse{animation:none}}"
+    "@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}.caret{animation:blink 1.05s step-end infinite}"
+    "@keyframes pulse{0%,100%{opacity:.9}50%{opacity:.3}}.pulse{animation:pulse 2.4s ease-in-out infinite}"
+    "@media (prefers-reduced-motion:reduce){.caret,.pulse{animation:none}}"
 )
 
 
 def fonts() -> str:
     return font_css(
-        display=NAME + "Meron Matti.",
-        serif=TAG_A + TAG_B,
+        display=NAME,
         monobold=ROLE + NOW,
-        mono=META + NOW_ITEMS + "".join(n[0] for n in NODES).upper(),
+        mono=COORDS + PREFIX + "".join(PHRASES) + NOW_ITEMS,
     )
 
 
-def background(w: int, h: int, seed: int) -> str:
-    field = ""
-    for i, (x, y, r, o) in enumerate(stars(90, w, h, seed)):
-        twinkle = f' class="tw" style="animation-delay:{(i % 7) * 0.5:.1f}s"' if i % 5 == 0 else ""
-        field += f'<circle cx="{x:.0f}" cy="{y:.0f}" r="{r}" fill="#fff" opacity="{o * 0.6:.2f}"{twinkle}/>'
+def backdrop(w: int, h: int) -> str:
+    ticks = "".join(
+        f'<path d="M{x} {y + dy * 16}V{y}H{x + dx * 16}" fill="none" stroke="#3A3A3A" stroke-width="1.5"/>'
+        for x, y, dx, dy in ((24, 24, 1, 1), (w - 24, 24, -1, 1), (24, h - 24, 1, -1), (w - 24, h - 24, -1, -1))
+    )
     return f"""
 <defs>
-  <radialGradient id="g1" cx="0.86" cy="0.12" r="0.75">
-    <stop offset="0" stop-color="{VIOLET}" stop-opacity="0.26"/><stop offset="1" stop-color="{VIOLET}" stop-opacity="0"/>
+  <radialGradient id="spot" cx="0.1" cy="-0.15" r="0.95">
+    <stop offset="0" stop-color="#fff" stop-opacity="0.085"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
   </radialGradient>
-  <radialGradient id="g2" cx="0.02" cy="1.05" r="0.6">
-    <stop offset="0" stop-color="#6B58D6" stop-opacity="0.18"/><stop offset="1" stop-color="#6B58D6" stop-opacity="0"/>
+  <radialGradient id="steel" cx="1.05" cy="1.1" r="0.7">
+    <stop offset="0" stop-color="{ACCENT}" stop-opacity="0.08"/><stop offset="1" stop-color="{ACCENT}" stop-opacity="0"/>
   </radialGradient>
-  <pattern id="rules" width="{w}" height="44" patternUnits="userSpaceOnUse">
-    <line x1="0" y1="43.5" x2="{w}" y2="43.5" stroke="#fff" stroke-opacity="0.022"/>
+  <pattern id="rules" width="{w}" height="40" patternUnits="userSpaceOnUse">
+    <line x1="0" y1="39.5" x2="{w}" y2="39.5" stroke="#fff" stroke-opacity="0.016"/>
   </pattern>
+  <linearGradient id="sheen" gradientUnits="userSpaceOnUse" x1="-420" y1="0" x2="-120" y2="0">
+    <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+    <stop offset="0.5" stop-color="#fff" stop-opacity="0.75"/>
+    <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    <animateTransform attributeName="gradientTransform" type="translate" values="0 0;{w + 600} 0;{w + 600} 0"
+      keyTimes="0;0.45;1" dur="9s" repeatCount="indefinite"/>
+  </linearGradient>
   <clipPath id="frame"><rect width="{w}" height="{h}" rx="28"/></clipPath>
 </defs>
 <g clip-path="url(#frame)">
   <rect width="{w}" height="{h}" fill="{INK}"/>
-  <rect width="{w}" height="{h}" fill="url(#g1)"/>
-  <rect width="{w}" height="{h}" fill="url(#g2)"/>
+  <rect width="{w}" height="{h}" fill="url(#spot)"/>
+  <rect width="{w}" height="{h}" fill="url(#steel)"/>
   <rect width="{w}" height="{h}" fill="url(#rules)"/>
-  {field}
 </g>
+{ticks}
 <rect x="0.75" y="0.75" width="{w - 1.5}" height="{h - 1.5}" rx="27.25" fill="none" stroke="{LINE}" stroke-width="1.5"/>"""
 
 
-def constellation(ox: float, oy: float, s: float) -> str:
-    cx, cy = ox + 170 * s, oy + 160 * s
-    out = [
-        f'<g class="orbit" style="transform-origin:{cx:.0f}px {cy:.0f}px">'
-        f'<ellipse cx="{cx:.0f}" cy="{cy:.0f}" rx="{215 * s:.0f}" ry="{215 * s:.0f}" fill="none" '
-        f'stroke="{VIOLET}" stroke-opacity="0.16" stroke-dasharray="2 7"/>'
-        f'<circle cx="{cx + 215 * s:.0f}" cy="{cy:.0f}" r="{3.5 * s:.1f}" fill="{VIOLET}"/></g>'
-    ]
-    for a, b in EDGES:
-        x1, y1, x2, y2 = *NODES[a][1:3], *NODES[b][1:3]
-        out.append(f'<line x1="{ox + x1 * s:.1f}" y1="{oy + y1 * s:.1f}" x2="{ox + x2 * s:.1f}" y2="{oy + y2 * s:.1f}" '
-                   f'stroke="{VIOLET}" stroke-opacity="0.35" stroke-width="1.2"/>')
-    for i, (label, x, y, bright, anchor, ldx, ldy) in enumerate(NODES):
-        px, py = ox + x * s, oy + y * s
-        r = (5.5 if bright else 4) * s
-        out.append(f'<circle cx="{px:.1f}" cy="{py:.1f}" r="{r * 3:.1f}" fill="{VIOLET}" opacity="0.14"/>')
-        out.append(f'<circle class="tw" style="animation-delay:{i * 0.6:.1f}s" cx="{px:.1f}" cy="{py:.1f}" '
-                   f'r="{r:.1f}" fill="{"#fff" if bright else VIOLET}"/>')
-        out.append(f'<text x="{px + ldx * s:.1f}" y="{py + ldy * s:.1f}" text-anchor="{anchor}" font-family="MM Mono" '
-                   f'font-size="{12.5 * s:.1f}" letter-spacing="{1.6 * s:.1f}" fill="{MUTED}">{esc(label.upper())}</text>')
-    return '<g clip-path="url(#frame)">' + "\n".join(out) + "</g>"
+def name_line(text: str, x: float, y: float, size: float, tracking: float) -> str:
+    """The name in bone, with a copy on top that a light band sweeps across every few seconds."""
+    attrs = f'x="{x}" y="{y}" font-family="MM Display" font-size="{size:.1f}" letter-spacing="{tracking}"'
+    return (f'<text {attrs} fill="{TEXT}">{esc(text)}</text>'
+            f'<text {attrs} fill="url(#sheen)" aria-hidden="true">{esc(text)}</text>')
 
 
-def now_chip(x: float, y: float, size: float) -> str:
-    label_w = measure(NOW, "monobold", size, 2.2)
-    items_w = measure(NOW_ITEMS.upper(), "mono", size, 2.2)
-    w = 46 + label_w + 18 + items_w + 22
-    h = size * 2.9
-    return f"""
-<rect x="{x}" y="{y}" width="{w:.0f}" height="{h:.0f}" rx="{h / 2:.0f}" fill="#fff" fill-opacity="0.03" stroke="{LINE}" stroke-width="1.5"/>
-<circle cx="{x + 24}" cy="{y + h / 2:.1f}" r="{size * 0.85:.1f}" fill="{VOLT}" opacity="0.18" class="pulse"/>
-<circle cx="{x + 24}" cy="{y + h / 2:.1f}" r="{size * 0.36:.1f}" fill="{VOLT}"/>
-<text x="{x + 46}" y="{y + h / 2 + size * 0.36:.1f}" font-family="MM Mono Bold" font-size="{size}" letter-spacing="2.2" fill="{TEXT}">{NOW}</text>
-<text x="{x + 46 + label_w + 18:.0f}" y="{y + h / 2 + size * 0.36:.1f}" font-family="MM Mono" font-size="{size}" letter-spacing="2.2" fill="{VIOLET}">{esc(NOW_ITEMS.upper())}</text>"""
+def fit(text: str, key: str, width: float, tracking: float, cap: float) -> float:
+    """Largest size (up to `cap`) at which `text` fits in `width`."""
+    return min(cap, (width - tracking * len(text)) / measure(text, key, 1))
+
+
+def typing(x: float, y: float, size: float, uid: str) -> str:
+    """Each phrase types in, holds, deletes; SMIL steps a clip rect one character at a time.
+
+    Without SMIL the first phrase is fully shown with the caret at its end, so a
+    frozen frame still reads as a finished sentence.
+    """
+    cw = measure("M", "mono", size)
+    spans, t = [], 0.0
+    for p in PHRASES:
+        n = len(p)
+        events = [(t + k * TYPE, k * cw) for k in range(1, n + 1)]
+        t_del = t + n * TYPE + HOLD
+        events += [(t_del + j * DELETE, (n - j) * cw) for j in range(1, n + 1)]
+        spans.append(events)
+        t = t_del + n * DELETE + GAP
+    total = t
+
+    def animate(attr: str, events: list[tuple[float, float]], base: float) -> str:
+        pts = [(0.0, base)] + [(et / total, v) for et, v in events]
+        return (f'<animate attributeName="{attr}" calcMode="discrete" dur="{total:.2f}s" repeatCount="indefinite" '
+                f'keyTimes="{";".join(f"{k:.5f}" for k, _ in pts)}" values="{";".join(f"{v:.1f}" for _, v in pts)}"/>')
+
+    out, defs = [], []
+    for i, (p, events) in enumerate(zip(PHRASES, spans)):
+        full = len(p) * cw if i == 0 else 0
+        defs.append(f'<clipPath id="{uid}{i}"><rect x="{x}" y="{y - size * 1.05:.1f}" width="{full:.1f}" '
+                    f'height="{size * 1.5:.1f}">{animate("width", events, 0)}</rect></clipPath>')
+        out.append(f'<text x="{x}" y="{y}" font-family="MM Mono" font-size="{size}" fill="{TEXT}" '
+                   f'clip-path="url(#{uid}{i})">{esc(p)}</text>')
+    caret_events = sorted((et, x + v) for events in spans for et, v in events)
+    caret_x = x + len(PHRASES[0]) * cw
+    out.append(f'<rect class="caret" x="{caret_x + 3:.1f}" y="{y - size * 0.82:.1f}" width="{size * 0.5:.1f}" '
+               f'height="{size * 1.02:.1f}" fill="{ACCENT}">{animate("x", [(et, v + 3) for et, v in caret_events], x + 3)}</rect>')
+    return f"<defs>{''.join(defs)}</defs>" + "".join(out)
+
+
+def now_chip(x: float, y: float, size: float, anchor_end: bool = False) -> str:
+    label_w = measure(NOW, "monobold", size, 2.4)
+    items_w = measure(NOW_ITEMS, "mono", size, 2.4)
+    w = 26 + label_w + 16 + items_w
+    x0 = x - w if anchor_end else x
+    cy = y - size * 0.36
+    return (f'<circle cx="{x0 + 6}" cy="{cy:.1f}" r="{size * 0.85:.1f}" fill="{SIGNAL}" opacity="0.16" class="pulse"/>'
+            f'<circle cx="{x0 + 6}" cy="{cy:.1f}" r="{size * 0.3:.1f}" fill="{SIGNAL}"/>'
+            f'<text x="{x0 + 26:.1f}" y="{y}" font-family="MM Mono Bold" font-size="{size}" letter-spacing="2.4" '
+            f'fill="{TEXT}">{NOW}</text>'
+            f'<text x="{x0 + 26 + label_w + 16:.1f}" y="{y}" font-family="MM Mono" font-size="{size}" '
+            f'letter-spacing="2.4" fill="{ACCENT}">{NOW_ITEMS}</text>')
 
 
 def svg(w: int, h: int, body: str) -> str:
-    desc = (f"{NAME}, full-stack and indie developer. {TAG_A}{TAG_B} Oakland University, B.S. Computer Science, "
-            f"May 2027, Michigan. Now building EasyMail and StayDue.")
+    desc = (f"Meron Matti, full-stack and indie developer. I build {PHRASES[0]} Also: "
+            + "; ".join(p.rstrip(".") for p in PHRASES[1:]) + f". {ABOUT} Now building EasyMail and StayDue.")
     return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" '
-            f'aria-labelledby="t d"><title id="t">{NAME}</title><desc id="d">{esc(desc)}</desc>'
-            f"<style>{fonts()}{MOTION}</style>{body}</svg>")
+            f'aria-labelledby="t d"><title id="t">Meron Matti</title><desc id="d">{esc(desc)}</desc>'
+            f"<style>{fonts()}{MOTION}</style>{backdrop(w, h)}{body}</svg>")
 
 
 def desktop() -> str:
-    w, h = 1200, 500
-    body = background(w, h, seed=7) + f"""
-<text x="64" y="104" font-family="MM Mono Bold" font-size="16" letter-spacing="4" fill="{VIOLET}">{ROLE}</text>
-<text x="60" y="236" font-family="MM Display" font-size="124" letter-spacing="-4.5" fill="{TEXT}">{NAME}<tspan fill="{VIOLET}">.</tspan></text>
-<text x="64" y="304" font-family="MM Serif" font-size="46" fill="{SOFT}">{TAG_A}<tspan fill="{VIOLET}">{TAG_B}</tspan></text>
-<text x="64" y="370" font-family="MM Mono" font-size="14.5" letter-spacing="2.4" fill="{MUTED}">{META}</text>
-{now_chip(64, 400, 14)}
-{constellation(810, 90, 1.0)}"""
+    w, h, pad = 1200, 500, 72
+    size = fit(NAME, "display", w - 2 * pad, 6, 150)
+    mono = 25
+    prefix_w = measure(PREFIX, "mono", mono)
+    body = f"""
+<text x="{pad}" y="92" font-family="MM Mono Bold" font-size="14" letter-spacing="4" fill="{ACCENT}">{ROLE}</text>
+<text x="{w - pad}" y="92" text-anchor="end" font-family="MM Mono" font-size="14" letter-spacing="2.4" fill="{MUTED}">{esc(COORDS)}</text>
+{name_line(NAME, pad - 4, 128 + size * 0.72, size, 6)}
+<line x1="{pad}" y1="{156 + size * 0.72:.0f}.5" x2="{w - pad}" y2="{156 + size * 0.72:.0f}.5" stroke="{LINE}" stroke-width="1.5"/>
+<text x="{pad}" y="{214 + size * 0.72:.0f}" font-family="MM Mono" font-size="{mono}" fill="{MUTED}"><tspan fill="{ACCENT}">›</tspan>{esc(PREFIX[1:])}</text>
+{typing(pad + prefix_w, 214 + size * 0.72, mono, "tw")}
+{outline(ABOUT, "body", 18, pad, h - 66, SOFT)}
+{now_chip(w - pad, h - 66, 13.5, anchor_end=True)}"""
     return svg(w, h, body)
 
 
 def phone() -> str:
-    w, h = 600, 820
-    body = background(w, h, seed=9) + f"""
-{constellation(250, 40, 0.92)}
-<text x="44" y="96" font-family="MM Mono Bold" font-size="17" letter-spacing="3.4" fill="{VIOLET}">FULL-STACK</text>
-<text x="44" y="122" font-family="MM Mono Bold" font-size="17" letter-spacing="3.4" fill="{VIOLET}">INDIE DEVELOPER</text>
-<text x="38" y="420" font-family="MM Display" font-size="118" letter-spacing="-4" fill="{TEXT}">Meron</text>
-<text x="38" y="524" font-family="MM Display" font-size="118" letter-spacing="-4" fill="{TEXT}">Matti<tspan fill="{VIOLET}">.</tspan></text>
-<text x="44" y="592" font-family="MM Serif" font-size="40" fill="{SOFT}">{TAG_A.strip()}</text>
-<text x="44" y="638" font-family="MM Serif" font-size="40" fill="{VIOLET}">{TAG_B}</text>
-<text x="44" y="694" font-family="MM Mono" font-size="16" letter-spacing="2" fill="{MUTED}">OAKLAND UNIVERSITY · CS · MAY 2027</text>
-{now_chip(44, 722, 15)}"""
+    w, h, pad = 600, 780, 44
+    size = fit("MERON", "display", w - 2 * pad, 5, 170)
+    mono = 19
+    body = f"""
+<text x="{pad}" y="84" font-family="MM Mono Bold" font-size="16" letter-spacing="3.4" fill="{ACCENT}">FULL-STACK</text>
+<text x="{pad}" y="110" font-family="MM Mono Bold" font-size="16" letter-spacing="3.4" fill="{ACCENT}">INDIE DEVELOPER</text>
+<text x="{w - pad}" y="84" text-anchor="end" font-family="MM Mono" font-size="15" letter-spacing="1.6" fill="{MUTED}">42.67° N</text>
+<text x="{w - pad}" y="110" text-anchor="end" font-family="MM Mono" font-size="15" letter-spacing="1.6" fill="{MUTED}">83.22° W</text>
+{name_line("MERON", pad - 4, 190 + size * 0.72, size, 5)}
+{name_line("MATTI", pad - 4, 214 + size * 1.44, size, 5)}
+<line x1="{pad}" y1="{250 + size * 1.44:.0f}.5" x2="{w - pad}" y2="{250 + size * 1.44:.0f}.5" stroke="{LINE}" stroke-width="1.5"/>
+<text x="{pad}" y="{306 + size * 1.44:.0f}" font-family="MM Mono" font-size="{mono + 2}" fill="{MUTED}"><tspan fill="{ACCENT}">›</tspan>{esc(PREFIX[1:])}</text>
+{typing(pad, 344 + size * 1.44, mono, "tp")}
+{outline("Computer Science at Oakland University,", "body", 21, pad, h - 138, SOFT)}
+{outline("class of 2027.", "body", 21, pad, h - 108, SOFT)}
+{now_chip(pad, h - 58, 15)}"""
     return svg(w, h, body)
 
 

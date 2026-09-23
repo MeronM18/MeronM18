@@ -17,29 +17,29 @@ ICONS = SCRIPTS / "icons"
 SHOTS = SCRIPTS / "shots"
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
-# Midnight surfaces, cool text, one ultraviolet accent and one "volt" signal color.
-INK = "#0A0A10"
-PANEL = "#12121A"
-RAISED = "#1A1A25"
-LINE = "#272733"
-TEXT = "#F3F1F8"
-SOFT = "#C7C3D4"
-MUTED = "#8E8A9E"
-VIOLET = "#A994FF"
-VIOLET_DIM = "#6B58D6"
-VIOLET_DEEP = "#5A3FD9"  # violet that holds 4.5:1+ on white
-VOLT = "#D4FF4F"
-LIGHT_TEXT = "#1B1830"
-LIGHT_MUTED = "#6A6680"
-LIGHT_LINE = "#E2DEF0"
+# Graphite surfaces, bone text, one cold steel accent. Near-monochrome on purpose.
+INK = "#0A0A0A"
+PANEL = "#111111"
+RAISED = "#171717"
+LINE = "#262626"
+TEXT = "#ECE9E2"
+SOFT = "#B3AFA7"
+MUTED = "#86827A"
+ACCENT = "#A9B4C0"       # steel: taglines, eyebrows, the one thing to look at
+ACCENT_DIM = "#5D6772"
+ACCENT_DEEP = "#3F4955"  # steel that holds 4.5:1+ on white
+SIGNAL = "#F4F0E6"       # status only: live or running now (always with a label)
+LIGHT_TEXT = "#111111"
+LIGHT_MUTED = "#5E5A54"
+LIGHT_LINE = "#DAD6CF"
 
 FAMILIES = {
-    "display": "MM Display",     # Bricolage Grotesque 800, opsz 96
-    "body": "MM Body",           # Bricolage Grotesque 400, opsz 14
-    "bodybold": "MM Body Bold",  # Bricolage Grotesque 600, opsz 14
-    "serif": "MM Serif",         # Instrument Serif Italic
-    "mono": "MM Mono",           # JetBrains Mono 500
-    "monobold": "MM Mono Bold",  # JetBrains Mono 700
+    "display": "MM Display",     # Bodoni Moda 500, opsz 96
+    "serif": "MM Serif",         # Bodoni Moda Italic 400, opsz 96
+    "body": "MM Body",           # Switzer 400 (never embedded in an SVG; see outline())
+    "bodybold": "MM Body Bold",  # Switzer 500
+    "mono": "MM Mono",           # IBM Plex Mono 400
+    "monobold": "MM Mono Bold",  # IBM Plex Mono 600
 }
 
 
@@ -81,6 +81,26 @@ def measure(text: str, key: str, size: float, tracking: float = 0) -> float:
     cmap, hmtx, upm = _metrics[key]
     units = sum(hmtx[cmap.get(ord(c), cmap[ord("?")])][0] for c in text)
     return units * size / upm + tracking * len(text)
+
+
+def outline(text: str, key: str, size: float, x: float, y: float, fill: str, tracking: float = 0,
+            anchor: str = "start", opacity: float = 1) -> str:
+    """`text` as one SVG <path>, for fonts whose license forbids embedding them as fonts (Switzer)."""
+    from fontTools.pens.svgPathPen import SVGPathPen
+    from fontTools.pens.transformPen import TransformPen
+    from fontTools.ttLib import TTFont
+
+    font = TTFont(FONTS / f"{key}.ttf")
+    glyphs, cmap, upm = font.getGlyphSet(), font.getBestCmap(), font["head"].unitsPerEm
+    k = size / upm
+    width = measure(text, key, size, tracking)
+    cx = x - {"start": 0, "middle": width / 2, "end": width}[anchor]
+    pen = SVGPathPen(glyphs)
+    for ch in text:
+        name = cmap.get(ord(ch), cmap[ord("?")])
+        glyphs[name].draw(TransformPen(pen, (k, 0, 0, -k, cx, y)))
+        cx += glyphs[name].width * k + tracking
+    return f'<path fill="{fill}" opacity="{opacity}" d="{pen.getCommands()}"/>'
 
 
 def font_files_css() -> str:

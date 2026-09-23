@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from brand import (ASSETS, INK, LINE, MUTED, PANEL, SOFT, TEXT, VIOLET, esc, font_css, icon_path, measure,
+from brand import (ASSETS, INK, LINE, MUTED, PANEL, SOFT, TEXT, ACCENT, esc, font_css, icon_path, measure,
                    write)
 
 # (label, Simple Icons slug or None for a lettermark)
@@ -43,8 +43,8 @@ def frame(w: int, h: int, body: str) -> str:
     return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" '
             f'aria-labelledby="t d"><title id="t">Toolkit</title><desc id="d">{esc(DESC)}</desc>'
             f'<style>{font_css(mono=labels, monobold=labels + "P")}</style>'
-            f'<defs><radialGradient id="g" cx="1" cy="0" r="0.9"><stop offset="0" stop-color="{VIOLET}" '
-            f'stop-opacity="0.14"/><stop offset="1" stop-color="{VIOLET}" stop-opacity="0"/></radialGradient></defs>'
+            f'<defs><radialGradient id="g" cx="1" cy="0" r="0.9"><stop offset="0" stop-color="{ACCENT}" '
+            f'stop-opacity="0.14"/><stop offset="1" stop-color="{ACCENT}" stop-opacity="0"/></radialGradient></defs>'
             f'<rect width="{w}" height="{h}" rx="28" fill="{INK}"/><rect width="{w}" height="{h}" rx="28" fill="url(#g)"/>'
             f'<rect x="0.75" y="0.75" width="{w - 1.5}" height="{h - 1.5}" rx="27.25" fill="none" stroke="{LINE}" '
             f'stroke-width="1.5"/>{body}</svg>')
@@ -54,7 +54,7 @@ def category(x: float, y: float, name: str, size: float) -> str:
     w = measure(name.upper(), "monobold", size, 3)
     return (f'<text x="{x}" y="{y}" font-family="MM Mono Bold" font-size="{size}" letter-spacing="3" '
             f'fill="{MUTED}">{esc(name.upper())}</text>'
-            f'<rect x="{x}" y="{y + 12}" width="{min(w, 26):.0f}" height="2" fill="{VIOLET}"/>')
+            f'<rect x="{x}" y="{y + 12}" width="{min(w, 26):.0f}" height="2" fill="{ACCENT}"/>')
 
 
 def desktop() -> str:
