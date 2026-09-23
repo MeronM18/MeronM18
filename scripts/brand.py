@@ -161,8 +161,8 @@ def stars(n: int, width: float, height: float, seed: int, avoid: tuple[float, fl
     return out
 
 
-def render(html: str, out: Path, width: int, height: int, scale: int = 2, quality: int = 88) -> None:
-    """Screenshot `html` in headless Chrome at width x height CSS px and save as WebP.
+def shoot(html: str, width: int, height: int, scale: int = 2):
+    """Screenshot `html` in headless Chrome at width x height CSS px, as an RGBA PIL image.
 
     The page background is transparent, so rounded card corners blend into either
     GitHub theme.
@@ -180,10 +180,24 @@ def render(html: str, out: Path, width: int, height: int, scale: int = 2, qualit
              f"--screenshot={png}", page.as_uri()],
             check=True, capture_output=True,
         )
-        img = Image.open(png).convert("RGBA").crop((0, 0, width * scale, height * scale))
-        out.parent.mkdir(parents=True, exist_ok=True)
-        img.save(out, "WEBP", quality=quality, method=6)
+        return Image.open(png).convert("RGBA").crop((0, 0, width * scale, height * scale))
+
+
+def render(html: str, out: Path, width: int, height: int, scale: int = 2, quality: int = 88) -> None:
+    """One screenshot of `html`, saved as WebP."""
+    out.parent.mkdir(parents=True, exist_ok=True)
+    shoot(html, width, height, scale).save(out, "WEBP", quality=quality, method=6)
     print(f"wrote {out.relative_to(ROOT)} ({out.stat().st_size // 1024} KB)")
+
+
+def render_anim(frames: list[tuple[str, int]], out: Path, width: int, height: int, scale: int = 2,
+                quality: int = 86) -> None:
+    """An animated WebP from (html, milliseconds) frames. It loops forever; the first frame is the poster."""
+    images = [shoot(html, width, height, scale) for html, _ in frames]
+    out.parent.mkdir(parents=True, exist_ok=True)
+    images[0].save(out, "WEBP", save_all=True, append_images=images[1:], duration=[ms for _, ms in frames],
+                   loop=0, quality=quality, method=4, minimize_size=True, allow_mixed=False)
+    print(f"wrote {out.relative_to(ROOT)} ({len(frames)} frames, {out.stat().st_size // 1024} KB)")
 
 
 def write(out: Path, content: str) -> None:

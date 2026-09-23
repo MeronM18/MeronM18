@@ -15,6 +15,14 @@ SECTIONS = {
 W, H = 1200, 104
 DISPLAY, SERIF, INDEX = 58, 60, 15
 
+# The hairline draws out from the words and the diamond lands at its end. Without CSS both are just there.
+MOTION = (
+    "@keyframes draw{from{transform:scaleX(0)}to{transform:scaleX(1)}}"
+    ".rule{transform-box:fill-box;transform-origin:left;animation:draw 1.6s cubic-bezier(.6,0,.2,1) .2s both}"
+    "@keyframes land{from{opacity:0}to{opacity:1}}.mark{animation:land .5s ease 1.6s both}"
+    "@media (prefers-reduced-motion:reduce){.rule,.mark{animation:none}}"
+)
+
 
 def heading(num: str, word: str, accent: str, dark: bool, W: int = W) -> str:
     """W is 1200 on desktop and 600 on phones, where the same type renders twice as large."""
@@ -26,11 +34,11 @@ def heading(num: str, word: str, accent: str, dark: bool, W: int = W) -> str:
     w2 = measure(accent, "serif", SERIF)
     end = x0 + w1 + w2 + 28
     body = f"""
-<style>{font_css(display=word, serif=accent, monobold=label)}</style>
+<style>{font_css(display=word, serif=accent, monobold=label)}{MOTION}</style>
 <text x="4" y="74" font-family="MM Mono Bold" font-size="{INDEX}" letter-spacing="2" fill="{muted}">{label}</text>
 <text x="{x0:.1f}" y="78" font-family="MM Display" font-size="{DISPLAY}" letter-spacing="-0.5" fill="{text}">{esc(word)} <tspan font-family="MM Serif" font-size="{SERIF}" letter-spacing="0" fill="{steel}">{esc(accent)}</tspan></text>
-<line x1="{end:.0f}" y1="68.5" x2="{W - 18}" y2="68.5" stroke="{line}" stroke-width="1.5"/>
-<rect x="{W - 12}" y="64.5" width="8" height="8" transform="rotate(45 {W - 8} 68.5)" fill="{steel}"/>"""
+<line class="rule" x1="{end:.0f}" y1="68.5" x2="{W - 18}" y2="68.5" stroke="{line}" stroke-width="1.5"/>
+<rect class="mark" x="{W - 12}" y="64.5" width="8" height="8" transform="rotate(45 {W - 8} 68.5)" fill="{steel}"/>"""
     title = f"{word} {accent}"
     return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img" '
             f'aria-label="{esc(title)}"><title>{esc(title)}</title>{body}</svg>')

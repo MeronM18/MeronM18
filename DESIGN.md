@@ -47,6 +47,9 @@ Background light is white at 7–9% opacity from the top-left (a desk lamp), plu
 - **Hero signature:** on load, each glyph of the script name is traced as an outline (`stroke-dashoffset` on a `pathLength="1"` path per glyph, staggered left to right), then fills with ink. The rule below it draws out after.
 - **Hero sheen:** once the name is written, a soft light band sweeps across it every 8 seconds.
 - **Toolkit:** tiles rise in row by row on load, then a diagonal wave of steel light passes through the grid every 6 seconds, lifting each logo as it goes. Category underlines draw in.
+- **Imperium card:** an animated WebP (44 frames, ~330 KB, 7.6 s loop). The message arrives, PAIR → PLAN → PERMIT → GATE check off in turn while the progress line fills, RUN lights up, the audit entry is written, then it holds and resets. `cards.py` renders each frame's state in Chrome (`imperium_state(t)`) and `brand.render_anim` assembles them, 15 fps while moving and one long frame while holding.
+- **Stats panel:** the weekly contributions line draws itself, the area and peak marker fade in, the language bar grows segment by segment.
+- **Section headings:** the hairline draws out from the words and the diamond lands at its end.
 - **Status pulse:** the "now building" and "say hello" dots breathe.
 - **Every animation adds to a finished frame.** Without animation the hero shows the whole name and the first phrase in full with the caret after it, and the toolkit shows every tile unlit.
 - CSS motion (signature, rule, caret, pulse, toolkit) turns off under `prefers-reduced-motion`. SMIL can't read that media query, so the typing and sheen still run.
@@ -61,9 +64,9 @@ python3 -m venv .venv && .venv/bin/pip install fonttools pillow uharfbuzz
 .venv/bin/python scripts/preview.py       # README in light/dark/phone, into .preview/
 ```
 
-Cards need Google Chrome. Live-site screenshots live in `scripts/shots/`; the Ledger.m one has its dollar amounts blanked. Bright screenshots get `tone=True` in `cards.py`, a steel duotone (grayscale, dimmed, steel tint) so they sit in the monochrome page. Dummy Peptides uses it.
+Cards need Google Chrome. Live-site screenshots live in `scripts/shots/`; the Ledger.m one has its dollar amounts blanked. Bright screenshots get `tone=True` in `cards.py`, a steel duotone (grayscale, dimmed, steel tint) so they sit in the monochrome page. Dummy Peptides uses it; Cosmo's phone gets the same steel treatment through a CSS filter.
 
-`.github/workflows/profile.yml` runs every 3 hours and on every push to main. It rebuilds the hero with a live **Now building** list (`scripts/now.py`: my two most recently pushed public repos from the last 21 days, excluding this repo, forks, templates and archived repos, with EasyMail · StayDue as the fallback), draws the contribution snake in greyscale, and publishes both to the `output` branch. The README loads the hero from there, so main never gets automated commits. `assets/header.svg` is the local copy.
+`.github/workflows/profile.yml` runs every 3 hours and on every push to main. It rebuilds the hero with a live **Now building** list, the **stats panel** (`scripts/stats.py`: contribution calendar and language bytes from the GraphQL API, falling back to `scripts/stats-snapshot.json`), (`scripts/now.py`: my two most recently pushed public repos from the last 21 days, excluding this repo, forks, templates and archived repos, with EasyMail · StayDue as the fallback), draws the contribution snake in greyscale, and publishes both to the `output` branch. The README loads the hero from there, so main never gets automated commits. `assets/header.svg` is the local copy.
 
 ## Still building
 

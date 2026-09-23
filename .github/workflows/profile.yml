@@ -1,8 +1,8 @@
 name: Live profile
 
 # Every 3 hours: redraw the hero with the repos I've pushed to most recently,
-# and redraw the contribution snake. Both go to the `output` branch, so main
-# never gets automated commits.
+# the stats panel from my contribution calendar, and the contribution snake.
+# All of it goes to the `output` branch, so main never gets automated commits.
 
 on:
   schedule:
@@ -40,6 +40,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python scripts/header.py --live --out dist
+
+      - name: Build live stats panel
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/stats.py --out dist
 
       # Colors follow DESIGN.md: graphite-to-bone for dark, grey-to-ink for light.
       - uses: Platane/snk@v3

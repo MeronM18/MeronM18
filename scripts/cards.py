@@ -7,7 +7,7 @@ phone layout (picked by a CSS media query), both at high DPI.
 from __future__ import annotations
 
 from brand import (ASSETS, INK, LINE, MUTED, PANEL, RAISED, SHOTS, SOFT, TEXT, ACCENT, ACCENT_DIM, SIGNAL,
-                   esc, font_files_css, render)
+                   esc, font_files_css, render, render_anim)
 
 DESKTOP_W = 1200
 PHONE_W = 500
@@ -103,12 +103,48 @@ TRACE = [
 ]
 
 
-def imperium() -> str:
+LOOP = 7.6  # seconds: message in, five checkpoints, audit, hold, reset
+RESET = (6.9, 7.3)
+
+
+def ease(a: float, b: float, t: float) -> float:
+    """0 before a, 1 after b, smoothstep between."""
+    x = min(max((t - a) / (b - a), 0.0), 1.0)
+    return x * x * (3 - 2 * x)
+
+
+def imperium_state(t: float | None) -> dict:
+    """How far each part of the trace has played at time t; None is the finished poster frame."""
+    if t is None:
+        return {"bubble": 1.0, "rows": [1.0] * len(TRACE), "audit": 1.0}
+    out = 1 - ease(*RESET, t)
+    return {
+        "bubble": ease(0.2, 0.6, t) * out,
+        "rows": [ease(1.1 + 0.6 * i - 0.3, 1.1 + 0.6 * i, t) * out for i in range(len(TRACE))],
+        "audit": ease(4.4, 4.8, t) * out,
+    }
+
+
+def imperium_frames() -> list[tuple[float, int]]:
+    """(time, milliseconds) samples: 15 fps while something moves, one long frame while it holds."""
+    moving = [(0.2, 0.6), (4.4, 4.8), RESET] + [(0.8 + 0.6 * i, 1.1 + 0.6 * i) for i in range(len(TRACE))]
+    times = {0.0, LOOP}
+    for a, b in moving:
+        n = max(int((b - a) * 15), 1)
+        times.update(round(a + (b - a) * k / n, 3) for k in range(n + 1))
+    times = sorted(times)
+    return [(t, round((nxt - t) * 1000)) for t, nxt in zip(times, times[1:]) if nxt > t]
+
+
+def imperium(t: float | None = None) -> str:
+    st = imperium_state(t)
     rows = "".join(
-        f'<div class="row"><b class="{kind}">{"✓" if kind == "ok" else "▸"}</b>'
+        f'<div class="row" style="--p:{p:.3f}"><b class="{kind}">{"" if kind == "ok" else "▸"}</b>'
         f'<span class="k">{k}</span><span class="v">{esc(v)}</span></div>'
-        for k, v, kind in TRACE
+        for (k, v, kind), p in zip(TRACE, st["rows"])
     )
+    fill = sum(st["rows"]) / len(TRACE)
+    b = st["bubble"]
     body = f"""
 <div class="wrap">
   <div class="text">
@@ -126,9 +162,9 @@ def imperium() -> str:
     <div class="chrome"><i></i><i></i><i></i><span>imperium · trace</span></div>
     <div class="inner">
       <div class="from">From phone · paired</div>
-      <div class="bubble">Play Drake on Spotify</div>
-      <div class="trace">{rows}</div>
-      <div class="audit"><span class="dot live"></span>audit · entry written to audit.db</div>
+      <div class="bubble" style="opacity:{b:.3f};transform:translateY({(1 - b) * 12:.1f}px)">Play Drake on Spotify</div>
+      <div class="trace" style="--f:{fill:.3f}"><i class="fill"></i>{rows}</div>
+      <div class="audit" style="opacity:{0.25 + 0.75 * st['audit']:.3f}"><span class="dot live" style="opacity:{st['audit']:.3f}"></span>audit · entry written to audit.db</div>
     </div>
   </div>
 </div>"""
@@ -142,12 +178,18 @@ def imperium() -> str:
 .bubble{{margin:12px 0 0 auto;width:max-content;max-width:80%;background:{TEXT};color:{INK};font-size:21px;
   padding:14px 20px;border-radius:20px 20px 6px 20px;font-family:'MM Body Bold'}}
 .trace{{position:relative;margin-top:30px;padding-left:4px}}
-.trace:before{{content:"";position:absolute;left:13px;top:14px;bottom:14px;width:1.5px;
+.trace:before{{content:"";position:absolute;left:13px;top:14px;bottom:14px;width:1.5px;background:{LINE}}}
+.fill{{position:absolute;left:13px;top:14px;width:1.5px;height:calc(var(--f) * (100% - 28px));
   background:linear-gradient({ACCENT},{ACCENT_DIM} 70%,{SIGNAL})}}
+.row{{opacity:calc(.3 + .7 * var(--p))}}
+.row b.ok:before{{content:'';width:4px;height:8px;margin-top:-2px;border:solid {ACCENT};border-width:0 1.5px 1.5px 0;
+  transform:rotate(45deg);opacity:var(--p)}}
 .row{{position:relative;display:flex;align-items:center;gap:16px;height:52px;font-family:'MM Mono';font-size:15.5px}}
 .row b{{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px;flex:none;
-  background:{PANEL};border:1.5px solid {ACCENT};color:{ACCENT};margin-left:0}}
-.row b.run{{border-color:{SIGNAL};color:{SIGNAL};box-shadow:0 0 16px rgba(244,240,230,.4)}}
+  background:{PANEL};border:1.5px solid color-mix(in srgb,{ACCENT} calc(var(--p) * 100%),{LINE});color:{ACCENT};
+  margin-left:0}}
+.row b.run{{border-color:color-mix(in srgb,{SIGNAL} calc(var(--p) * 100%),{LINE});color:{SIGNAL};
+  box-shadow:0 0 calc(var(--p) * 16px) rgba(244,240,230,.4)}}
 .row .k{{width:74px;color:{TEXT};letter-spacing:.12em;font-family:'MM Mono Bold';font-size:14px}}
 .row .v{{color:{SOFT};white-space:nowrap}}
 .audit{{display:flex;align-items:center;gap:12px;margin-top:26px;padding:14px 18px;border:1.5px dashed {LINE};
@@ -251,7 +293,7 @@ def cosmo() -> str:
   radial-gradient(900px 500px at 0% 110%,rgba(169,180,192,.06),transparent 60%),{INK}}}
 .wrap{{position:relative;display:flex;align-items:center;gap:40px;height:100%;padding:0 40px 0 64px}}
 .text{{width:560px;flex:none}}
-.phone{{height:660px;margin:0 0 0 70px;filter:drop-shadow(0 40px 60px rgba(0,0,0,.6))}}
+.phone{{height:660px;margin:0 0 0 70px;filter:grayscale(1) sepia(.18) hue-rotate(175deg) saturate(.7) brightness(.96) contrast(1.08) drop-shadow(0 40px 60px rgba(0,0,0,.6))}}
 .orbit{{position:absolute;border:1.5px solid rgba(255,255,255,.10);border-radius:50%}}
 .o1{{width:560px;height:560px;left:672px;top:26px}}
 .o2{{width:760px;height:760px;left:572px;top:-74px;border-style:dashed;border-color:rgba(255,255,255,.07)}}
@@ -355,6 +397,11 @@ CARDS = {
 def main(only: list[str] | None = None) -> None:
     for name, (build, desktop_h, phone_h) in CARDS.items():
         if only and name not in only:
+            continue
+        if name == "imperium":  # animated: the trace plays out, holds, and resets
+            frames = [(imperium(t), ms) for t, ms in imperium_frames()]
+            render_anim(frames, ASSETS / "cards" / f"{name}.webp", DESKTOP_W, desktop_h, scale=2)
+            render_anim(frames, ASSETS / "cards" / f"{name}-phone.webp", PHONE_W, phone_h, scale=2)
             continue
         html = build()
         render(html, ASSETS / "cards" / f"{name}.webp", DESKTOP_W, desktop_h, scale=2)
