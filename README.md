@@ -1,6 +1,6 @@
 <picture>
   <source media="(max-width: 600px)" srcset="https://raw.githubusercontent.com/MeronM18/MeronM18/output/header-phone.svg" />
-  <img src="https://raw.githubusercontent.com/MeronM18/MeronM18/output/header.svg" width="100%" alt="Meron Matti, written in script. Full-stack and indie developer. I build things for fun, then I ship them; agents that run my Mac from my phone; finance apps wired to real bank accounts; storefronts that ship real orders; iOS apps with paid subscriptions. Computer Science at Oakland University, class of 2027. Now building: my most recently pushed public repos, updated every 3 hours." />
+  <img src="https://raw.githubusercontent.com/MeronM18/MeronM18/output/header.svg" width="100%" alt="Meron Matti, written in script. Full-stack and indie developer. I build things for fun, then I ship them; agents that run my Mac from my phone; finance apps wired to real bank accounts; storefronts that ship real orders; iOS apps with paid subscriptions. Computer Science at Oakland University, class of 2027. Now building: my most recently pushed public repos, updated every 5 minutes." />
 </picture>
 
 <p align="center">
@@ -134,7 +134,7 @@ I'm Meron, a Computer Science student at Oakland University. I build things for 
 
 <picture>
   <source media="(max-width: 600px)" srcset="https://raw.githubusercontent.com/MeronM18/MeronM18/output/stats-phone.svg" />
-  <img src="https://raw.githubusercontent.com/MeronM18/MeronM18/output/stats.svg" width="100%" alt="Live GitHub stats, updated every 3 hours: contributions today, in the last 12 months and the last 30 days, current streak, busiest day, a weekly contributions chart, and languages across my public repos." />
+  <img src="https://raw.githubusercontent.com/MeronM18/MeronM18/output/stats.svg" width="100%" alt="Live GitHub stats, updated every 5 minutes: commits today across every branch and repo (Eastern time), contributions in the last 12 months and the last 30 days, current streak, busiest day, a weekly contributions chart, and languages across my public repos." />
 </picture>
 
 <br />

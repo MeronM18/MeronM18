@@ -1,11 +1,16 @@
 name: Live profile
 
-# Every 3 hours: redraw the hero with the repos I've pushed to most recently,
-# the stats panel from my contribution calendar, and the contribution snake.
-# All of it goes to the `output` branch, so main never gets automated commits.
+# Every 5 minutes: redraw the hero ("now building") and the stats panel, whose
+# "commits today" counts every branch of every repo since midnight Eastern.
+# Every 3 hours (and on push): also redraw the contribution snake.
+# Everything goes to the `output` branch, so main never gets automated commits.
+#
+# Private repos only count if the PROFILE_TOKEN secret holds a read-only token
+# that can see them (see DESIGN.md); without it, public repos still work.
 
 on:
   schedule:
+    - cron: "*/5 * * * *"
     - cron: "17 */3 * * *"
   workflow_dispatch:
   push:
@@ -16,7 +21,7 @@ permissions:
 
 concurrency:
   group: live-profile
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -25,6 +30,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Start from what's published, so a quick run keeps the last snake.
+      - name: Start from the published output
+        run: |
+          mkdir -p dist
+          if git fetch --depth=1 origin output; then git archive FETCH_HEAD | tar -x -C dist; fi
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -32,8 +43,18 @@ jobs:
       - name: Install font tools
         run: pip install fonttools uharfbuzz pillow
 
-      # Switzer can't be committed (see DESIGN.md), so fetch the fonts on each run.
+      # Switzer can't be committed (see DESIGN.md); fetch it once and cache it.
+      - name: Cache fonts
+        id: fonts
+        uses: actions/cache@v4
+        with:
+          path: |
+            scripts/fonts/body.ttf
+            scripts/fonts/bodybold.ttf
+          key: fonts-${{ hashFiles('scripts/fetch_fonts.py') }}
+
       - name: Fetch fonts
+        if: steps.fonts.outputs.cache-hit != 'true'
         run: python scripts/fetch_fonts.py
 
       - name: Build hero with live "now building"
@@ -43,11 +64,13 @@ jobs:
 
       - name: Build live stats panel
         env:
+          PROFILE_TOKEN: ${{ secrets.PROFILE_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python scripts/stats.py --out dist
 
       # Colors follow DESIGN.md: graphite-to-bone for dark, grey-to-ink for light.
       - uses: Platane/snk@v3
+        if: github.event_name != 'schedule' || github.event.schedule == '17 */3 * * *'
         with:
           github_user_name: ${{ github.repository_owner }}
           outputs: |

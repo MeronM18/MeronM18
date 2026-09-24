@@ -17,6 +17,7 @@ import sys
 import urllib.request
 from collections import Counter
 from datetime import date, datetime, timezone
+from zoneinfo import ZoneInfo
 from pathlib import Path
 
 from brand import (ACCENT, ASSETS, INK, LINE, MUTED, SCRIPTS, SIGNAL, SOFT, TEXT, esc, font_css, measure,
@@ -32,25 +33,80 @@ MONTHS = "JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC".split()
 SHADES = [TEXT, ACCENT, "#7C8794", "#56606B", "#3A424B"]  # languages, largest first
 
 
+EASTERN = ZoneInfo("America/New_York")
+
+# Whose commits count as mine for "commits today". GitHub's own graph misses a lot of real work:
+# it only counts default branches, and only emails linked to the account. This counts every
+# branch, and these identities: my account, my Mac's local git email (not linked on GitHub),
+# and commits my Claude sessions make in my repos. Bots and other people's commits never count.
+MY_LOGINS = {"MeronM18"}
+MY_EMAILS = {"meron@merons-macbook-pro.local", "meronmatti123@gmail.com"}
+AGENT_EMAILS = {"noreply@anthropic.com"}
+
+REPOS_QUERY = """query($login:String!){user(login:$login){id repositories(first:40,orderBy:{field:PUSHED_AT,direction:DESC},
+  ownerAffiliations:[OWNER,COLLABORATOR,ORGANIZATION_MEMBER]){nodes{name owner{login} pushedAt}}}}"""
+BRANCHES = """refs(refPrefix:"refs/heads/",first:100){nodes{target{... on Commit{
+  history(since:$since,first:100){nodes{oid author{email user{login}}}}}}}}"""
+
+
 def token() -> str | None:
-    if t := os.environ.get("GITHUB_TOKEN"):
-        return t
+    """PROFILE_TOKEN (a read-only token that can see private repos) beats the workflow's GITHUB_TOKEN,
+    which only sees public ones; locally, fall back to the gh CLI's token."""
+    for name in ("PROFILE_TOKEN", "GITHUB_TOKEN"):
+        if t := os.environ.get(name):
+            return t
     try:
         return subprocess.run(["gh", "auth", "token"], capture_output=True, text=True, check=True).stdout.strip()
     except Exception:
         return None
 
 
+def graphql(query: str, variables: dict) -> dict:
+    req = urllib.request.Request(
+        "https://api.github.com/graphql",
+        data=json.dumps({"query": query, "variables": variables}).encode(),
+        headers={"Authorization": f"Bearer {token()}", "User-Agent": USER},
+    )
+    with urllib.request.urlopen(req, timeout=30) as r:
+        body = json.load(r)
+    if body.get("errors"):
+        raise RuntimeError(body["errors"][0].get("message"))
+    return body["data"]
+
+
+def is_mine(author: dict) -> bool:
+    login = ((author or {}).get("user") or {}).get("login") or ""
+    email = ((author or {}).get("email") or "").lower()
+    if login.endswith("[bot]") or "[bot]" in email:
+        return False
+    return login in MY_LOGINS or email in MY_EMAILS or email in AGENT_EMAILS
+
+
+def commits_today() -> dict:
+    """Distinct commits of mine since midnight Eastern, across every branch of every repo I can see."""
+    now = datetime.now(EASTERN)
+    start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    repos = graphql(REPOS_QUERY, {"login": USER})["user"]["repositories"]["nodes"]
+    fresh = [r for r in repos
+             if datetime.fromisoformat(r["pushedAt"].replace("Z", "+00:00")) >= start]
+    oids: set[str] = set()
+    if fresh:
+        parts = "".join(f'r{i}:repository(owner:"{r["owner"]["login"]}",name:"{r["name"]}"){{{BRANCHES}}}'
+                        for i, r in enumerate(fresh))
+        data = graphql(f"query($since:GitTimestamp!){{{parts}}}", {"since": start.isoformat()})
+        for repo in data.values():
+            for ref in (repo or {}).get("refs", {}).get("nodes", []):
+                for c in ((ref.get("target") or {}).get("history") or {}).get("nodes", []):
+                    if is_mine(c["author"]):
+                        oids.add(c["oid"])
+    return {"count": len(oids), "date": start.date().isoformat()}
+
+
 def fetch() -> dict:
-    """Raw GraphQL user data, live if possible, else the snapshot."""
+    """Raw GraphQL user data plus today's commit count, live if possible, else the snapshot."""
     try:
-        req = urllib.request.Request(
-            "https://api.github.com/graphql",
-            data=json.dumps({"query": QUERY, "variables": {"login": USER}}).encode(),
-            headers={"Authorization": f"Bearer {token()}", "User-Agent": USER},
-        )
-        with urllib.request.urlopen(req, timeout=30) as r:
-            user = json.load(r)["data"]["user"]
+        user = graphql(QUERY, {"login": USER})["user"]
+        user["commitsToday"] = commits_today()
         user["fetchedAt"] = datetime.now(timezone.utc).isoformat(timespec="minutes")
         SNAPSHOT.write_text(json.dumps(user))
         return user
@@ -82,19 +138,25 @@ def summarize(user: dict) -> dict:
     if rest > 0.005:
         top.append(("Other", rest))
     bd = date.fromisoformat(busiest["date"])
-    td = date.fromisoformat(days[-1]["date"])  # the calendar's last day is today (GitHub's day boundary)
+    today = user.get("commitsToday") or {"count": counts[-1], "date": days[-1]["date"]}
+    td = date.fromisoformat(today["date"])
+    fetched = user.get("fetchedAt")
+    updated = ""
+    if fetched:
+        et = datetime.fromisoformat(fetched).astimezone(EASTERN)
+        updated = f"{MONTHS[et.month - 1]} {et.day} · {et.strftime('%-I:%M %p')} ET"
     return {
         "total": cal["totalContributions"],
         "month": sum(counts[-30:]),
         "streak": streak,
         "busiest": busiest["contributionCount"],
         "busiest_label": f"{MONTHS[bd.month - 1]} {bd.day}",
-        "today": counts[-1],
+        "today": today["count"],
         "today_label": f"{MONTHS[td.month - 1]} {td.day}",
         "weeks": weeks,
         "week_starts": firsts,
         "langs": top,
-        "updated": user.get("fetchedAt", "")[:16].replace("T", " "),
+        "updated": updated,
     }
 
 
@@ -207,7 +269,7 @@ def stats_list(s: dict) -> list[tuple[str, str, str]]:
         (str(s["month"]), "IN THE LAST 30 DAYS", "accent"),
         (str(s["streak"]), "DAY STREAK", ""),
         (str(s["busiest"]), f"BUSIEST DAY · {s['busiest_label']}", ""),
-        (str(s["today"]), f"TODAY · {s['today_label']}", "hero"),
+        (str(s["today"]), f"COMMITS TODAY · {s['today_label']}", "hero"),
     ]
 
 
@@ -215,8 +277,8 @@ def frame(w: int, h: int, s: dict, body: str) -> str:
     items = stats_list(s)
     glyph_text = "".join(v for v, _, _ in items)
     labels = "".join(l for _, l, _ in items) + "".join(MONTHS) + "".join(n.upper() for n, _ in s["langs"])
-    labels += "0123456789% · LIVE UPDATED UTC:-PEAK WEEK LANGUAGES WEEKLY CONTRIBUTIONS ON GITHUB LAST 12 MONTHS TODAY REFRESHES EVERY 3H"
-    desc = (f"{s['today']} contributions today, {s['total']} in the last 12 months, {s['month']} in the last 30 days, a {s['streak']}-day "
+    labels += "0123456789% · LIVE UPDATED UTC:-PEAK WEEK LANGUAGES WEEKLY CONTRIBUTIONS ON GITHUB LAST 12 MONTHS TODAY COMMITS ET AM PM EVERY BRANCH REPO"
+    desc = (f"{s['today']} commits today (Eastern time, every branch), {s['total']} contributions in the last 12 months, {s['month']} in the last 30 days, a {s['streak']}-day "
             f"streak, busiest day {s['busiest']} on {s['busiest_label'].title()}. Languages: "
             + ", ".join(f"{n} {v * 100:.0f}%" for n, v in s["langs"]) + ".")
     ticks = "".join(
@@ -237,7 +299,7 @@ def frame(w: int, h: int, s: dict, body: str) -> str:
 
 
 def live_tag(x: float, y: float, s: dict, size: float, anchor_end: bool = True) -> str:
-    text = f"LIVE · UPDATED {s['updated']} UTC" if s["updated"] else "LIVE"
+    text = f"LIVE · UPDATED {s['updated']}" if s["updated"] else "LIVE"
     tw = measure(text, "mono", size, 1.8)
     x0 = x - tw - 20 if anchor_end else x
     return (f'<circle cx="{x0 + 4}" cy="{y - size * 0.36:.1f}" r="{size * 0.8:.1f}" fill="{SIGNAL}" opacity="0.16" '
@@ -277,7 +339,7 @@ def phone(s: dict) -> str:
     body += hero_panel(pad - 16, 362, w - 2 * pad + 32, 132)
     body += stat(pad, 444, *today[:2], 68, 13.5, "hero")
     body += (f'<text x="{w - pad}" y="{444 + 13.5 * 2.4:.1f}" text-anchor="end" font-family="MM Mono" font-size="13" '
-             f'letter-spacing="1.6" fill="{MUTED}">REFRESHES EVERY 3H</text>')
+             f'letter-spacing="1.6" fill="{MUTED}">EVERY BRANCH · EVERY REPO</text>')
     dy = 150
     body += section_label(pad, 420 + dy, "WEEKLY CONTRIBUTIONS", 15)
     body += chart(s, pad, 470 + dy, w - 2 * pad, 170, 13)
