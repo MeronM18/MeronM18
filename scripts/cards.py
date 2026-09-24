@@ -86,8 +86,10 @@ def screenshot(src: str, crop: tuple[int, int, int, int], width: int) -> str:
     """Crop (x, y, w, h) out of a screenshot in scripts/shots and scale it to `width` px."""
     x, y, w, h = crop
     s = width / w
+    from PIL import Image
+
     img = (SHOTS / src).as_uri()
-    full_w = 1600 * s  # the stored screenshots are 1600px wide
+    full_w = Image.open(SHOTS / src).width * s
     return (f'<div class="shot" style="width:{width}px;height:{h * s:.0f}px">'
             f'<img src="{img}" style="width:{full_w:.0f}px;left:{-x * s:.0f}px;top:{-y * s:.0f}px"></div>')
 
@@ -231,8 +233,9 @@ def imperium(t: float | None = None) -> str:
 
 def shot_card(eyebrow: str, title: str, tag: str, desc: str, status: str, live: bool, tags: list[str],
               shot: str, crop: tuple[int, int, int, int], flip: bool, seed: int, url: str,
-              tone: bool = False) -> str:
-    """`tone` turns a bright screenshot into a steel duotone so it sits in the monochrome page."""
+              tone: str | None = None) -> str:
+    """`tone` turns a screenshot steel so it sits in the monochrome page: "light" for bright sites
+    (dimmed duotone), "dark" for dark apps (grayscale, lifted slightly)."""
     text = f"""
   <div class="text">
     <div class="eyebrow">{eyebrow}</div>
@@ -247,7 +250,7 @@ def shot_card(eyebrow: str, title: str, tag: str, desc: str, status: str, live: 
     <div class="chrome"><i></i><i></i><i></i><span>{esc(url)}</span></div>
     {screenshot(shot, crop, 700 if flip else 820)}
   </div>"""
-    body = (f'<div class="wrap{" flip" if flip else ""}{" toned" if tone else ""}">'
+    body = (f'<div class="wrap{" flip" if flip else ""}{f" toned {tone}" if tone else ""}">'
             f'{visual + text if flip else text + visual}</div>')
     css = f"""
 .wrap{{position:relative;display:flex;gap:56px;height:100%;padding:64px 0 0 64px}}
@@ -260,6 +263,8 @@ def shot_card(eyebrow: str, title: str, tag: str, desc: str, status: str, live: 
 .wrap.flip .visual{{width:700px;border-top-left-radius:0;border-left:none}}
 .meta{{display:flex;flex-direction:column;gap:10px;margin-top:26px}}
 .toned .shot img{{filter:grayscale(1) brightness(.74) contrast(1.18)}}
+.toned.dark .shot img{{filter:grayscale(1) brightness(1.12) contrast(1.12)}}
+.toned.dark .shot:after{{display:none}}
 .toned .shot:after{{content:'';position:absolute;inset:0;background:linear-gradient(160deg,rgba(169,180,192,.30),rgba(10,10,10,.28));mix-blend-mode:multiply}}
 .toned .shot:before{{content:'';position:absolute;inset:0;z-index:1;background:{ACCENT};mix-blend-mode:color;opacity:.22}}
 .url{{font-family:'MM Mono';font-size:14px;letter-spacing:.06em;color:{MUTED}}}
@@ -282,17 +287,17 @@ def ledger() -> str:
         "A single-user finance app wired to my real bank accounts through Plaid. Net worth, spending and income "
         "by category, monthly budgets, subscriptions, and what's due next.",
         "Private deploy", False, ["Next.js", "Supabase", "Plaid", "Tailwind"],
-        "ledger.png", (49, 110, 1502, 770), flip=False, seed=21, url="ledgerm.vercel.app",
+        "ledger.png", (292, 0, 1708, 1011), flip=True, seed=21, url="ledgerm.vercel.app", tone="dark",
     )
 
 
 def dummy() -> str:
     return shot_card(
-        "03 · E-commerce", "Dummy Peptides", "Catalog to checkout, <em>live.</em>",
+        "04 · E-commerce", "Dummy Peptides", "Catalog to checkout, <em>live.</em>",
         "The storefront for a research-peptide business I co-own: catalog, accounts, cart, and an affiliate "
         "program, with shipping, email, and SMS built in.",
         "Live", True, ["React", "Supabase", "Shippo", "Twilio"],
-        "dummypeptides.png", (186, 110, 1244, 770), flip=True, seed=31, url="dummypeptides.com", tone=True,
+        "dummypeptides.png", (186, 110, 1244, 770), flip=True, seed=31, url="dummypeptides.com", tone="light",
     )
 
 
@@ -304,7 +309,7 @@ def cosmo() -> str:
 <div class="orbit o1"></div><div class="orbit o2"></div>
 <div class="wrap">
   <div class="text">
-    <div class="eyebrow">04 · iOS app</div>
+    <div class="eyebrow">03 · iOS app</div>
     <div class="title">Cosmo</div>
     <div class="tag">Your guide through the stars, <em>dreams, and destiny.</em></div>
     <div class="desc">An iOS-first astrology app with personalized AI-generated readings, user accounts, and paid subscriptions through RevenueCat.</div>
@@ -411,7 +416,7 @@ def progress() -> str:
 
 CARDS = {
     "imperium": (imperium, 740, 1290),
-    "ledger": (ledger, 600, 790),
+    "ledger": (ledger, 650, 790),
     "dummypeptides": (dummy, 640, 960),
     "cosmo": (cosmo, 680, 960),
     "progress": (progress, 680, 1400),

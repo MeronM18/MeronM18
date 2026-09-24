@@ -65,7 +65,7 @@ python3 -m venv .venv && .venv/bin/pip install fonttools pillow uharfbuzz
 .venv/bin/python scripts/preview.py       # README in light/dark/phone, into .preview/
 ```
 
-Cards need Google Chrome. Live-site screenshots live in `scripts/shots/`; the Ledger.m one has its dollar amounts blanked. Bright screenshots get `tone=True` in `cards.py`, a steel duotone (grayscale, dimmed, steel tint) so they sit in the monochrome page. Dummy Peptides uses it; Cosmo's phone gets the same steel treatment through a CSS filter.
+Cards need Google Chrome. Live-site screenshots live in `scripts/shots/`. Every screenshot is toned toward steel through `tone=` in `cards.py`: `"light"` for bright sites (grayscale, dimmed, steel tint; Dummy Peptides) and `"dark"` for dark apps (grayscale, lifted slightly, steel tint; Ledger.m's Spending view). Cosmo's phone gets the same treatment through a CSS filter. Cards alternate sides: Imperium right, Ledger.m left, Cosmo right, Dummy Peptides left.
 
 `.github/workflows/profile.yml` runs every 3 hours and on every push to main. It rebuilds the hero with a live **Now building** list, the **stats panel** (`scripts/stats.py`: contribution calendar and language bytes from the GraphQL API, falling back to `scripts/stats-snapshot.json`), draws the contribution snake (Platane/snk) in greyscale, (`scripts/now.py`: my two most recently pushed public repos from the last 21 days, excluding this repo, forks, templates and archived repos, with EasyMail · StayDue as the fallback), and publishes both to the `output` branch. The README loads the hero from there, so main never gets automated commits. `assets/header.svg` is the local copy.
 

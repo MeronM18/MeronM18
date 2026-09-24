@@ -44,7 +44,7 @@ I'm Meron, a Computer Science student at Oakland University. I build things for 
 <a href="https://github.com/MeronM18/Ledger.m">
   <picture>
     <source media="(max-width: 600px)" srcset="./assets/cards/ledger-phone.webp" />
-    <img src="./assets/cards/ledger.webp" width="100%" alt="Ledger.m, personal finance. A single-user finance app connected to my real bank accounts through Plaid: net worth, spending and income by category, subscriptions, and upcoming payments. Private deploy. Next.js, Supabase, Plaid, Tailwind." />
+    <img src="./assets/cards/ledger.webp" width="100%" alt="Ledger.m, personal finance. A single-user finance app connected to my real bank accounts through Plaid; shown here is the Spending view: spending by category and by month, pace against last month, and the biggest changes. Private deploy. Next.js, Supabase, Plaid, Tailwind." />
   </picture>
 </a>
 
@@ -52,6 +52,19 @@ I'm Meron, a Computer Science student at Oakland University. I build things for 
   <img src="./assets/buttons/private.svg" height="40" alt="Private deployment" />
   &nbsp;
   <a href="https://github.com/MeronM18/Ledger.m"><img src="./assets/buttons/source.svg" height="40" alt="Ledger.m source" /></a>
+</p>
+
+<br />
+
+<a href="https://github.com/MeronM18/Cosmo">
+  <picture>
+    <source media="(max-width: 600px)" srcset="./assets/cards/cosmo-phone.webp" />
+    <img src="./assets/cards/cosmo.webp" width="100%" alt="Cosmo, iOS app. Your guide through the stars, dreams, and destiny. An iOS-first astrology app with personalized AI-generated readings, user accounts, and paid subscriptions through RevenueCat. Expo, React Native, TypeScript, Supabase, RevenueCat, OpenAI." />
+  </picture>
+</a>
+
+<p align="center">
+  <a href="https://github.com/MeronM18/Cosmo"><img src="./assets/buttons/source.svg" height="40" alt="Cosmo source" /></a>
 </p>
 
 <br />
@@ -67,19 +80,6 @@ I'm Meron, a Computer Science student at Oakland University. I build things for 
   <a href="https://dummypeptides.com"><img src="./assets/buttons/live.svg" height="40" alt="Visit the live site" /></a>
   &nbsp;
   <a href="https://github.com/MeronM18/dummypeptides"><img src="./assets/buttons/source.svg" height="40" alt="Dummy Peptides source" /></a>
-</p>
-
-<br />
-
-<a href="https://github.com/MeronM18/Cosmo">
-  <picture>
-    <source media="(max-width: 600px)" srcset="./assets/cards/cosmo-phone.webp" />
-    <img src="./assets/cards/cosmo.webp" width="100%" alt="Cosmo, iOS app. Your guide through the stars, dreams, and destiny. An iOS-first astrology app with personalized AI-generated readings, user accounts, and paid subscriptions through RevenueCat. Expo, React Native, TypeScript, Supabase, RevenueCat, OpenAI." />
-  </picture>
-</a>
-
-<p align="center">
-  <a href="https://github.com/MeronM18/Cosmo"><img src="./assets/buttons/source.svg" height="40" alt="Cosmo source" /></a>
 </p>
 
 <br />
