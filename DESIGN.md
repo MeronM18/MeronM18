@@ -49,7 +49,7 @@ Background light is white at 7–9% opacity from the top-left (a desk lamp), plu
 - **Toolkit:** tiles rise in row by row on load, then a diagonal wave of steel light passes through the grid every 6 seconds, lifting each logo as it goes. Category underlines draw in.
 - **Imperium card:** an animated WebP (72 frames, ~380 KB, 7.6 s loop). The message arrives, PAIR → PLAN → PERMIT → GATE check off in turn while the progress line fills, RUN lights up, the audit entry is written, a "Now playing on the Mac" result slides in with a bouncing equalizer, then it resets. `cards.py` renders each frame's state in Chrome (`imperium_state(t)`) and `brand.render_anim` assembles them, 15 fps while moving and one long frame while holding.
 - **Footer:** "Let's build it." is a second signature in Imperial Script that writes itself, holds, fades and writes again on a 9-second loop, so it plays whenever someone scrolls to it.
-- **Stats panel:** the weekly contributions line draws itself, the area and peak marker fade in, the language bar grows segment by segment.
+- **Stats panel:** five headline numbers; **Today** (the calendar's last day) is the hero: bone-white with a soft glow, a pulsing live dot and a faint steel plate behind it. The weekly contributions line draws itself, the area and peak marker fade in, the language bar grows segment by segment.
 - **Section headings:** the hairline draws out from the words and the diamond lands at its end.
 - **Status pulse:** the "now building" and "say hello" dots breathe.
 - **Every animation adds to a finished frame.** Without animation the hero shows the whole name and the first phrase in full with the caret after it, and the toolkit shows every tile unlit.

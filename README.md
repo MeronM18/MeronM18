@@ -134,7 +134,7 @@ I'm Meron, a Computer Science student at Oakland University. I build things for 
 
 <picture>
   <source media="(max-width: 600px)" srcset="https://raw.githubusercontent.com/MeronM18/MeronM18/output/stats-phone.svg" />
-  <img src="https://raw.githubusercontent.com/MeronM18/MeronM18/output/stats.svg" width="100%" alt="Live GitHub stats, updated every 3 hours: contributions in the last 12 months and the last 30 days, current streak, busiest day, a weekly contributions chart, and languages across my public repos." />
+  <img src="https://raw.githubusercontent.com/MeronM18/MeronM18/output/stats.svg" width="100%" alt="Live GitHub stats, updated every 3 hours: contributions today, in the last 12 months and the last 30 days, current streak, busiest day, a weekly contributions chart, and languages across my public repos." />
 </picture>
 
 <br />

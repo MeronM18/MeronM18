@@ -82,12 +82,15 @@ def summarize(user: dict) -> dict:
     if rest > 0.005:
         top.append(("Other", rest))
     bd = date.fromisoformat(busiest["date"])
+    td = date.fromisoformat(days[-1]["date"])  # the calendar's last day is today (GitHub's day boundary)
     return {
         "total": cal["totalContributions"],
         "month": sum(counts[-30:]),
         "streak": streak,
         "busiest": busiest["contributionCount"],
         "busiest_label": f"{MONTHS[bd.month - 1]} {bd.day}",
+        "today": counts[-1],
+        "today_label": f"{MONTHS[td.month - 1]} {td.day}",
         "weeks": weeks,
         "week_starts": firsts,
         "langs": top,
@@ -175,19 +178,36 @@ def langs(s: dict, x: float, y: float, w: float, size: float, per_row: int) -> s
     return "".join(out)
 
 
-def stat(x: float, y: float, value: str, label: str, size: float, label_size: float, accent: bool = False) -> str:
-    return (f'<text x="{x}" y="{y}" font-family="MM Display" font-size="{size}" fill="{ACCENT if accent else TEXT}">'
-            f'{esc(value)}</text>'
+def stat(x: float, y: float, value: str, label: str, size: float, label_size: float, kind: str = "",
+         tracking: float = 2) -> str:
+    """One headline number. kind "accent" is steel; "hero" (today) glows bone-white with a live dot."""
+    if kind == "hero":
+        dot_y = y + label_size * 2.4 - label_size * 0.36
+        return (f'<text x="{x}" y="{y}" font-family="MM Display" font-size="{size}" fill="{SIGNAL}" '
+                f'filter="url(#glow)">{esc(value)}</text>'
+                f'<circle cx="{x + 5}" cy="{dot_y:.1f}" r="{label_size * 0.75:.1f}" fill="{SIGNAL}" opacity="0.18" '
+                f'class="pulse"/><circle cx="{x + 5}" cy="{dot_y:.1f}" r="{label_size * 0.28:.1f}" fill="{SIGNAL}"/>'
+                f'<text x="{x + 18}" y="{y + label_size * 2.4:.1f}" font-family="MM Mono Bold" font-size="{label_size}" '
+                f'letter-spacing="{tracking}" fill="{TEXT}">{esc(label)}</text>')
+    return (f'<text x="{x}" y="{y}" font-family="MM Display" font-size="{size}" '
+            f'fill="{ACCENT if kind == "accent" else TEXT}">{esc(value)}</text>'
             f'<text x="{x + 2}" y="{y + label_size * 2.4:.1f}" font-family="MM Mono" font-size="{label_size}" '
-            f'letter-spacing="2" fill="{MUTED}">{esc(label)}</text>')
+            f'letter-spacing="{tracking}" fill="{MUTED}">{esc(label)}</text>')
 
 
-def stats_list(s: dict) -> list[tuple[str, str, bool]]:
+def hero_panel(x: float, y: float, w: float, h: float) -> str:
+    """A faint raised plate behind today's number so it reads as the live one."""
+    return (f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h:.1f}" rx="16" fill="#fff" fill-opacity="0.035" '
+            f'stroke="{ACCENT}" stroke-opacity="0.35" stroke-width="1.2"/>')
+
+
+def stats_list(s: dict) -> list[tuple[str, str, str]]:
     return [
-        (f"{s['total']:,}", "CONTRIBUTIONS · 12 MO", False),
-        (str(s["month"]), "IN THE LAST 30 DAYS", True),
-        (str(s["streak"]), "DAY STREAK", False),
-        (str(s["busiest"]), f"BUSIEST DAY · {s['busiest_label']}", False),
+        (f"{s['total']:,}", "CONTRIBUTIONS · 12 MO", ""),
+        (str(s["month"]), "IN THE LAST 30 DAYS", "accent"),
+        (str(s["streak"]), "DAY STREAK", ""),
+        (str(s["busiest"]), f"BUSIEST DAY · {s['busiest_label']}", ""),
+        (str(s["today"]), f"TODAY · {s['today_label']}", "hero"),
     ]
 
 
@@ -195,8 +215,8 @@ def frame(w: int, h: int, s: dict, body: str) -> str:
     items = stats_list(s)
     glyph_text = "".join(v for v, _, _ in items)
     labels = "".join(l for _, l, _ in items) + "".join(MONTHS) + "".join(n.upper() for n, _ in s["langs"])
-    labels += "0123456789% · LIVE UPDATED UTC:-PEAK WEEK LANGUAGES WEEKLY CONTRIBUTIONS ON GITHUB LAST 12 MONTHS"
-    desc = (f"{s['total']} contributions in the last 12 months, {s['month']} in the last 30 days, a {s['streak']}-day "
+    labels += "0123456789% · LIVE UPDATED UTC:-PEAK WEEK LANGUAGES WEEKLY CONTRIBUTIONS ON GITHUB LAST 12 MONTHS TODAY REFRESHES EVERY 3H"
+    desc = (f"{s['today']} contributions today, {s['total']} in the last 12 months, {s['month']} in the last 30 days, a {s['streak']}-day "
             f"streak, busiest day {s['busiest']} on {s['busiest_label'].title()}. Languages: "
             + ", ".join(f"{n} {v * 100:.0f}%" for n, v in s["langs"]) + ".")
     ticks = "".join(
@@ -207,7 +227,10 @@ def frame(w: int, h: int, s: dict, body: str) -> str:
             f'aria-labelledby="t d"><title id="t">GitHub activity</title><desc id="d">{esc(desc)}</desc>'
             f'<style>{font_css(display=glyph_text, mono=labels, monobold=labels)}{MOTION}</style>'
             f'<defs><radialGradient id="spot" cx="0.1" cy="-0.2" r="0.9"><stop offset="0" stop-color="#fff" '
-            f'stop-opacity="0.07"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>'
+            f'stop-opacity="0.07"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>'
+            f'<filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="7" '
+            f'result="b"/><feColorMatrix in="b" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 .55 0" result="g"/>'
+            f'<feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>'
             f'<rect width="{w}" height="{h}" rx="28" fill="{INK}"/><rect width="{w}" height="{h}" rx="28" fill="url(#spot)"/>'
             f'{ticks}<rect x="0.75" y="0.75" width="{w - 1.5}" height="{h - 1.5}" rx="27.25" fill="none" '
             f'stroke="{LINE}" stroke-width="1.5"/>{body}</svg>')
@@ -231,11 +254,13 @@ def section_label(x: float, y: float, text: str, size: float) -> str:
 def desktop(s: dict) -> str:
     w, h, pad = 1200, 620, 64
     body = section_label(pad, 84, "ON GITHUB · LAST 12 MONTHS", 13) + live_tag(w - pad, 84, s, 13)
-    col = (w - 2 * pad) / 4
-    for i, (v, l, acc) in enumerate(stats_list(s)):
-        body += stat(pad + i * col, 178, v, l, 64, 12, acc)
-        if i:
-            body += f'<line x1="{pad + i * col - 24:.1f}" y1="124" x2="{pad + i * col - 24:.1f}" y2="210" stroke="{LINE}"/>'
+    items = stats_list(s)
+    col = (w - 2 * pad) / len(items)
+    body += hero_panel(pad + (len(items) - 1) * col - 22, 112, col + 22 + 10, 116)
+    for i, (v, l, kind) in enumerate(items):
+        body += stat(pad + i * col, 178, v, l, 64, 12, kind, tracking=1.4)
+        if 0 < i < len(items) - 1:
+            body += f'<line x1="{pad + i * col - 22:.1f}" y1="124" x2="{pad + i * col - 22:.1f}" y2="210" stroke="{LINE}"/>'
     body += chart(s, pad, 262, w - 2 * pad, 170, 12)
     body += section_label(pad, 516, "LANGUAGES · PUBLIC REPOS", 13)
     body += langs(s, pad, 536, w - 2 * pad, 13, 5)
@@ -245,15 +270,21 @@ def desktop(s: dict) -> str:
 def phone(s: dict) -> str:
     w, pad = 600, 40
     body = section_label(pad, 76, "GITHUB · LIVE", 15)
-    for i, (v, l, acc) in enumerate(stats_list(s)):
+    *rest, today = stats_list(s)
+    for i, (v, l, kind) in enumerate(rest):
         r, c = divmod(i, 2)
-        body += stat(pad + c * 270, 168 + r * 130, v, l, 68, 13.5, acc)
-    body += section_label(pad, 420, "WEEKLY CONTRIBUTIONS", 15)
-    body += chart(s, pad, 470, w - 2 * pad, 170, 13)
-    body += section_label(pad, 736, "LANGUAGES", 15)
-    body += langs(s, pad, 758, w - 2 * pad, 15, 2)
+        body += stat(pad + c * 270, 168 + r * 130, v, l, 68, 13.5, kind)
+    body += hero_panel(pad - 16, 362, w - 2 * pad + 32, 132)
+    body += stat(pad, 444, *today[:2], 68, 13.5, "hero")
+    body += (f'<text x="{w - pad}" y="{444 + 13.5 * 2.4:.1f}" text-anchor="end" font-family="MM Mono" font-size="13" '
+             f'letter-spacing="1.6" fill="{MUTED}">REFRESHES EVERY 3H</text>')
+    dy = 150
+    body += section_label(pad, 420 + dy, "WEEKLY CONTRIBUTIONS", 15)
+    body += chart(s, pad, 470 + dy, w - 2 * pad, 170, 13)
+    body += section_label(pad, 736 + dy, "LANGUAGES", 15)
+    body += langs(s, pad, 758 + dy, w - 2 * pad, 15, 2)
     rows = (len(s["langs"]) + 1) // 2
-    ly = 758 + 8 + 15 * 2.4 + rows * 15 * 2.2 + 34
+    ly = 758 + dy + 8 + 15 * 2.4 + rows * 15 * 2.2 + 34
     body += live_tag(pad, ly, s, 14, anchor_end=False)
     return frame(w, int(ly + 50), s, body)
 
