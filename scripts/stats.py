@@ -92,8 +92,6 @@ def summarize(user: dict) -> dict:
         "week_starts": firsts,
         "langs": top,
         "updated": user.get("fetchedAt", "")[:16].replace("T", " "),
-        "calendar": [[d["contributionCount"] for d in w["contributionDays"]] for w in cal["weeks"]],
-        "active_days": sum(1 for c in counts if c),
     }
 
 
@@ -260,98 +258,12 @@ def phone(s: dict) -> str:
     return frame(w, int(ly + 50), s, body)
 
 
-GRID_SHADES = ["#171717", "#2E3237", "#4F5760", "#8A95A1", "#DCE2E8"]
-
-
-def level(count: int, cuts: list[int]) -> int:
-    return 0 if count == 0 else 1 + sum(count > c for c in cuts)
-
-
-def grid(s: dict, weeks_shown: int, w: int, pad: int, cell: float, gap: float, label: float) -> str:
-    """The contribution calendar as a steel heatmap. A scanner light sweeps across it on a loop and
-    today's square pulses. Without CSS it is a finished, unlit grid."""
-    cal = s["calendar"][-weeks_shown:]
-    starts = s["week_starts"][-weeks_shown:]
-    nonzero = sorted(c for wk in s["calendar"] for c in wk if c)
-    cuts = [nonzero[int(len(nonzero) * q)] for q in (0.25, 0.5, 0.75)] if nonzero else [1, 2, 3]
-    step = cell + gap
-    top = 132
-    sweep = 5.5  # seconds for the light to cross
-    cells, scan, months, last = [], [], [], None
-    for i, (wk, start) in enumerate(zip(cal, starts)):
-        x = pad + i * step
-        m = int(start[5:7])
-        if m != last and i and i < len(cal) - 1:
-            months.append(f'<text x="{x:.1f}" y="{top - 14}" font-family="MM Mono" font-size="{label}" '
-                          f'letter-spacing="1.5" fill="{MUTED}">{MONTHS[m - 1]}</text>')
-        last = m
-        for j, c in enumerate(wk):
-            cells.append(f'<rect x="{x:.1f}" y="{top + j * step:.1f}" width="{cell}" height="{cell}" rx="{cell * 0.22:.1f}" '
-                         f'fill="{GRID_SHADES[level(c, cuts)]}"/>')
-        scan.append(f'<rect class="scan" opacity="0" style="animation-delay:{0.8 + i * sweep / len(cal):.2f}s" '
-                    f'x="{x - gap / 2:.1f}" y="{top - gap / 2:.1f}" width="{step:.1f}" height="{7 * step:.1f}" '
-                    f'fill="url(#beam)"/>')
-    # today = last day with data in the final week
-    tx = pad + (len(cal) - 1) * step
-    ty = top + (len(cal[-1]) - 1) * step
-    legend_y = top + 7 * step + 38
-    legend = "".join(
-        f'<rect x="{w - pad - (5 - k) * (cell + 5) - 40:.1f}" y="{legend_y - cell + 3:.1f}" width="{cell}" '
-        f'height="{cell}" rx="{cell * 0.22:.1f}" fill="{GRID_SHADES[k]}"/>' for k in range(5)
-    )
-    return f"""
-<defs><linearGradient id="beam" x1="0" y1="0" x2="1" y2="0">
-  <stop offset="0" stop-color="{TEXT}" stop-opacity="0"/><stop offset="0.5" stop-color="{TEXT}" stop-opacity="0.55"/>
-  <stop offset="1" stop-color="{TEXT}" stop-opacity="0"/></linearGradient></defs>
-{"".join(months)}{"".join(cells)}<g style="mix-blend-mode:screen">{"".join(scan)}</g>
-<rect class="pulse" x="{tx - 3:.1f}" y="{ty - 3:.1f}" width="{cell + 6}" height="{cell + 6}" rx="{cell * 0.35:.1f}"
-  fill="none" stroke="{SIGNAL}" stroke-width="1.5"/>
-<text x="{pad}" y="{legend_y}" font-family="MM Mono" font-size="{label}" letter-spacing="1.8" fill="{MUTED}">{s["active_days"]} ACTIVE DAYS{" · TODAY OUTLINED" if w >= 800 else ""}</text>
-<text x="{w - pad - 5 * (cell + 5) - 52:.1f}" y="{legend_y}" text-anchor="end" font-family="MM Mono" font-size="{label}" letter-spacing="1.8" fill="{MUTED}">LESS</text>
-{legend}
-<text x="{w - pad}" y="{legend_y}" text-anchor="end" font-family="MM Mono" font-size="{label}" letter-spacing="1.8" fill="{MUTED}">MORE</text>"""
-
-
-GRID_MOTION = (
-    "@keyframes scan{0%,100%{opacity:0}3%{opacity:1}9%{opacity:0}}"
-    ".scan{animation:scan 7s ease-in-out infinite}"
-    "@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}.pulse{animation:pulse 1.8s ease-in-out infinite}"
-    "@media (prefers-reduced-motion:reduce){.scan,.pulse{animation:none}}"
-)
-
-
-def grid_card(s: dict, w: int, weeks_shown: int, pad: int, cell: float, gap: float, label: float, title: str) -> str:
-    body = grid(s, weeks_shown, w, pad, cell, gap, label)
-    h = int(132 + 7 * (cell + gap) + 38 + 52)
-    text = (title + "".join(MONTHS) + "ACTIVE DAYS TODAY OUTLINED LESS MORE0123456789·")
-    desc = f"Contribution calendar for the {title.lower()}: {s['active_days']} active days in the last 12 months."
-    ticks = "".join(
-        f'<path d="M{x} {y + dy * 16}V{y}H{x + dx * 16}" fill="none" stroke="#3A3A3A" stroke-width="1.5"/>'
-        for x, y, dx, dy in ((24, 24, 1, 1), (w - 24, 24, -1, 1))
-    )
-    return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" '
-            f'aria-labelledby="t d"><title id="t">Contribution grid</title><desc id="d">{esc(desc)}</desc>'
-            f'<style>{font_css(mono=text, monobold=text)}{GRID_MOTION}</style>'
-            f'<defs><radialGradient id="spot" cx="0.9" cy="-0.2" r="0.9"><stop offset="0" stop-color="#fff" '
-            f'stop-opacity="0.06"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>'
-            f'<rect width="{w}" height="{h}" rx="28" fill="{INK}"/><rect width="{w}" height="{h}" rx="28" fill="url(#spot)"/>'
-            f'{ticks}<rect x="0.75" y="0.75" width="{w - 1.5}" height="{h - 1.5}" rx="27.25" fill="none" '
-            f'stroke="{LINE}" stroke-width="1.5"/>'
-            f'<text x="{pad}" y="76" font-family="MM Mono Bold" font-size="{label + 1}" letter-spacing="3" '
-            f'fill="{MUTED}">{title}</text>{body}</svg>')
-
-
 def main(argv: list[str] | None = None) -> None:
     argv = argv or []
     out = Path(argv[argv.index("--out") + 1]) if "--out" in argv else ASSETS
     s = summarize(fetch())
     write(out / "stats.svg", desktop(s))
     write(out / "stats-phone.svg", phone(s))
-    weeks = len(s["calendar"])
-    step = (1200 - 2 * 64) / weeks
-    write(out / "grid.svg", grid_card(s, 1200, weeks, 64, round(step * 0.8, 1), round(step * 0.2, 1), 12,
-                                      "CONTRIBUTION GRID · LAST 12 MONTHS"))
-    write(out / "grid-phone.svg", grid_card(s, 600, 26, 40, 15.6, 4.2, 13, "CONTRIBUTIONS · LAST 6 MONTHS"))
 
 
 if __name__ == "__main__":

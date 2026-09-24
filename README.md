@@ -141,8 +141,8 @@ I'm Meron, a Computer Science student at Oakland University. I build things for 
 <br />
 
 <picture>
-  <source media="(max-width: 600px)" srcset="https://raw.githubusercontent.com/MeronM18/MeronM18/output/grid-phone.svg" />
-  <img src="https://raw.githubusercontent.com/MeronM18/MeronM18/output/grid.svg" width="100%" alt="My GitHub contribution calendar as a steel heatmap, with a light sweeping across it and today's square outlined. Updated every 3 hours." />
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/MeronM18/MeronM18/output/snake-dark.svg" />
+  <img src="https://raw.githubusercontent.com/MeronM18/MeronM18/output/snake-light.svg" width="100%" alt="A snake eating my GitHub contribution graph, redrawn every 3 hours" />
 </picture>
 
 <br />
