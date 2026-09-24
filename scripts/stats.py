@@ -44,28 +44,32 @@ MY_EMAILS = {"meron@merons-macbook-pro.local", "meronmatti123@gmail.com"}
 AGENT_EMAILS = {"noreply@anthropic.com"}
 
 REPOS_QUERY = """query($login:String!){user(login:$login){id repositories(first:40,orderBy:{field:PUSHED_AT,direction:DESC},
-  ownerAffiliations:[OWNER,COLLABORATOR,ORGANIZATION_MEMBER]){nodes{name owner{login} pushedAt}}}}"""
+  ownerAffiliations:[OWNER,COLLABORATOR,ORGANIZATION_MEMBER]){nodes{name owner{login} pushedAt isPrivate}}}}"""
 BRANCHES = """refs(refPrefix:"refs/heads/",first:100){nodes{target{... on Commit{
   history(since:$since,first:100){nodes{oid author{email user{login}}}}}}}}"""
 
 
-def token() -> str | None:
-    """PROFILE_TOKEN (a read-only token that can see private repos) beats the workflow's GITHUB_TOKEN,
-    which only sees public ones; locally, fall back to the gh CLI's token."""
-    for name in ("PROFILE_TOKEN", "GITHUB_TOKEN"):
-        if t := os.environ.get(name):
-            return t
-    try:
-        return subprocess.run(["gh", "auth", "token"], capture_output=True, text=True, check=True).stdout.strip()
-    except Exception:
-        return None
+def tokens() -> list[tuple[str, str]]:
+    """(name, token) to try in order: PROFILE_TOKEN (read-only, can see private repos), then the workflow's
+    GITHUB_TOKEN (public repos only), then locally the gh CLI's token."""
+    out = [(n, os.environ[n]) for n in ("PROFILE_TOKEN", "GITHUB_TOKEN") if os.environ.get(n)]
+    if not out:
+        try:
+            out.append(("gh", subprocess.run(["gh", "auth", "token"], capture_output=True, text=True,
+                                             check=True).stdout.strip()))
+        except Exception:
+            pass
+    return out
+
+
+_TOKEN: str | None = None
 
 
 def graphql(query: str, variables: dict) -> dict:
     req = urllib.request.Request(
         "https://api.github.com/graphql",
         data=json.dumps({"query": query, "variables": variables}).encode(),
-        headers={"Authorization": f"Bearer {token()}", "User-Agent": USER},
+        headers={"Authorization": f"Bearer {_TOKEN}", "User-Agent": USER},
     )
     with urllib.request.urlopen(req, timeout=30) as r:
         body = json.load(r)
@@ -89,6 +93,9 @@ def commits_today() -> dict:
     repos = graphql(REPOS_QUERY, {"login": USER})["user"]["repositories"]["nodes"]
     fresh = [r for r in repos
              if datetime.fromisoformat(r["pushedAt"].replace("Z", "+00:00")) >= start]
+    # Counts only: this repo's Actions logs are public, so private repo names are never printed.
+    print(f"stats.py: {len(repos)} repos visible ({sum(r['isPrivate'] for r in repos)} private), "
+          f"{len(fresh)} pushed today")
     oids: set[str] = set()
     if fresh:
         parts = "".join(f'r{i}:repository(owner:"{r["owner"]["login"]}",name:"{r["name"]}"){{{BRANCHES}}}'
@@ -99,20 +106,26 @@ def commits_today() -> dict:
                 for c in ((ref.get("target") or {}).get("history") or {}).get("nodes", []):
                     if is_mine(c["author"]):
                         oids.add(c["oid"])
+    print(f"stats.py: {len(oids)} commits today (Eastern)")
     return {"count": len(oids), "date": start.date().isoformat()}
 
 
 def fetch() -> dict:
-    """Raw GraphQL user data plus today's commit count, live if possible, else the snapshot."""
-    try:
-        user = graphql(QUERY, {"login": USER})["user"]
-        user["commitsToday"] = commits_today()
-        user["fetchedAt"] = datetime.now(timezone.utc).isoformat(timespec="minutes")
-        SNAPSHOT.write_text(json.dumps(user))
-        return user
-    except Exception as e:
-        print(f"stats.py: GitHub API unavailable ({e}); using snapshot")
-        return json.loads(SNAPSHOT.read_text())
+    """Raw GraphQL user data plus today's commit count, live if possible, else the snapshot.
+    A token that fails (expired, revoked) falls through to the next one before the snapshot."""
+    global _TOKEN
+    for name, _TOKEN in tokens():
+        try:
+            user = graphql(QUERY, {"login": USER})["user"]
+            user["commitsToday"] = commits_today()
+            user["fetchedAt"] = datetime.now(timezone.utc).isoformat(timespec="minutes")
+            SNAPSHOT.write_text(json.dumps(user))
+            print(f"stats.py: live data via {name}")
+            return user
+        except Exception as e:
+            print(f"stats.py: {name} failed ({e})")
+    print("stats.py: using snapshot")
+    return json.loads(SNAPSHOT.read_text())
 
 
 def summarize(user: dict) -> dict:
