@@ -7,7 +7,7 @@ phone layout (picked by a CSS media query), both at high DPI.
 from __future__ import annotations
 
 from brand import (ASSETS, INK, LINE, MUTED, PANEL, RAISED, SHOTS, SOFT, TEXT, ACCENT, ACCENT_DIM, SIGNAL,
-                   esc, font_files_css, render, render_anim)
+                   esc, font_files_css, render)
 
 DESKTOP_W = 1200
 PHONE_W = 500
@@ -94,139 +94,143 @@ def screenshot(src: str, crop: tuple[int, int, int, int], width: int) -> str:
             f'<img src="{img}" style="width:{full_w:.0f}px;left:{-x * s:.0f}px;top:{-y * s:.0f}px"></div>')
 
 
-# --- Imperium ---------------------------------------------------------------
+# --- Kyuu Cafe ------------------------------------------------------------------
+# Facts: the live site (kyuucafe9.com, screenshots taken with Playwright), kyuu-platform's
+# README and PROGRESS.md (ordering built and tested on staging, not public yet), and the resume.
 
-TRACE = [
-    ("PAIR", "token verified · paired phone", "ok"),
-    ("PLAN", 'open Spotify → search "Drake" → play', "ok"),
-    ("PERMIT", "low risk · no confirm tap needed", "ok"),
-    ("GATE", "script lexed · app on allowlist", "ok"),
-    ("RUN", 'tell application "Spotify"', "run"),
-]
+def kyuu() -> str:
+    phone = (SHOTS / "kyuu-phone.jpg").as_uri()
+    body = f"""
+<div class="wrap">
+  <div class="visual">
+    <div class="window">
+      <div class="chrome"><i></i><i></i><i></i><span>kyuucafe9.com</span></div>
+      {screenshot("kyuu.jpg", (0, 0, 2000, 1250), 660)}
+    </div>
+    <div class="handset"><img src="{phone}"></div>
+  </div>
+  <div class="text">
+    <div class="eyebrow">01 · Client work · Matti Studio</div>
+    <div class="title">Kyuu Cafe</div>
+    <div class="tag">Every pickup order, <em>one queue.</em></div>
+    <div class="desc">The production website for a cafe in Shelby Township, MI, and a custom ordering system across web, iOS and Android, with an iPad order screen for baristas modeled on DoorDash and Uber Eats tablets. Built in-house after the POS provider denied API access.</div>
+    <div class="stats">
+      <div class="stat"><div class="n">500–1K</div><div class="l">visitors<br>a week</div></div>
+      <div class="stat"><div class="n v">150</div><div class="l">orders a day,<br>built to handle</div></div>
+    </div>
+    <div class="meta">
+      <span class="status"><span class="dot live"></span>Website live</span>
+      <span class="status"><span class="dot"></span>Ordering built · in testing</span>
+    </div>
+    {pills("Next.js", "Expo", "Supabase", "Stripe")}
+  </div>
+</div>"""
+    css = f"""
+.wrap{{position:relative;display:flex;gap:44px;height:100%;padding:64px 64px 0 0}}
+.visual{{position:relative;width:660px;flex:none;margin-top:14px}}
+.window{{border-top-left-radius:0;border-left:none}}
+.text{{width:432px;flex:none}}
+.title{{font-size:88px}}
+.tag{{font-size:31px}}
+.desc{{font-size:18.5px;line-height:1.55}}
+.stats{{gap:40px;margin-top:26px}}
+.stat .n{{font-size:54px}}
+.meta{{display:flex;flex-direction:column;gap:12px;margin-top:26px}}
+.handset{{position:absolute;right:-26px;top:236px;width:174px;border-radius:30px;padding:7px;background:#0d0d0d;
+  border:1.5px solid #3a3a3a;box-shadow:0 30px 60px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.04)}}
+.handset img{{display:block;width:100%;border-radius:23px}}
+.shot img,.handset img{{filter:grayscale(1) brightness(1.06) contrast(1.1)}}
+.shot:before,.handset:before{{content:'';position:absolute;inset:0;z-index:1;background:{ACCENT};
+  mix-blend-mode:color;opacity:.22;pointer-events:none;border-radius:inherit}}
+@media (max-width:700px){{
+  .wrap{{flex-direction:column;gap:40px;padding:44px 36px 0}}
+  .text{{width:auto;order:0}}
+  .visual{{order:1;width:auto;margin:0 0 0 -36px}}
+  .window{{border-top-left-radius:0;border-left:none}}
+  .shot{{zoom:.682}}
+  .title{{font-size:72px}}
+  .stat .n{{font-size:46px}}
+  .handset{{width:120px;right:-6px;top:150px;border-radius:22px;padding:5px}}
+  .handset img{{border-radius:17px}}
+}}"""
+    return page(body, seed=11, extra_css=css)
 
 
-LOOP = 7.6  # seconds: message in, five checkpoints, audit, hold, reset
-RESET = (6.9, 7.3)
+# --- Jarvis ---------------------------------------------------------------------
+# No screenshots exist, so the visual is a diagram, labeled as one. Every box comes from
+# PersonalAI's ARCHITECTURE.md / ROADMAP.md (built and tested Oct 2026, shut down Oct 14).
+
+JARVIS_READS = ["Email", "Calendar", "Texts", "School portal", "Finances"]
+JARVIS_ACTS = ["Sends email and texts", "Places phone calls", "Delegates coding tasks"]
 
 
-def ease(a: float, b: float, t: float) -> float:
-    """0 before a, 1 after b, smoothstep between."""
-    x = min(max((t - a) / (b - a), 0.0), 1.0)
-    return x * x * (3 - 2 * x)
-
-
-def imperium_state(t: float | None) -> dict:
-    """How far each part of the trace has played at time t; None is the finished poster frame."""
-    if t is None:
-        return {"bubble": 1.0, "rows": [1.0] * len(TRACE), "audit": 1.0, "result": 1.0}
-    out = 1 - ease(*RESET, t)
-    return {
-        "bubble": ease(0.2, 0.6, t) * out,
-        "rows": [ease(1.1 + 0.6 * i - 0.3, 1.1 + 0.6 * i, t) * out for i in range(len(TRACE))],
-        "audit": ease(4.4, 4.8, t) * out,
-        "result": ease(5.0, 5.4, t) * out,
-    }
-
-
-def imperium_frames() -> list[tuple[float, int]]:
-    """(time, milliseconds) samples: 15 fps while something moves, one long frame while it holds."""
-    # 5.0-6.9 covers the result sliding in and the equalizer bouncing while it holds.
-    moving = [(0.2, 0.6), (4.4, 4.8), (5.0, 6.9), RESET] + [(0.8 + 0.6 * i, 1.1 + 0.6 * i) for i in range(len(TRACE))]
-    times = {0.0, LOOP}
-    for a, b in moving:
-        n = max(int((b - a) * 15), 1)
-        times.update(round(a + (b - a) * k / n, 3) for k in range(n + 1))
-    times = sorted(times)
-    return [(t, round((nxt - t) * 1000)) for t, nxt in zip(times, times[1:]) if nxt > t]
-
-
-def eq_bars(t: float | None) -> str:
-    """Four equalizer bars; they bounce while the song plays and rest at a fixed shape on the poster."""
-    import math
-    rest = [0.4, 0.95, 0.6, 0.8]
-    if t is None:
-        heights = rest
-    else:
-        heights = [0.25 + 0.75 * abs(math.sin(t * (5.3 + k * 1.7) + k)) for k in range(4)]
-    return "".join(f'<i style="height:{h * 100:.0f}%"></i>' for h in heights)
-
-
-def imperium(t: float | None = None) -> str:
-    st = imperium_state(t)
-    rows = "".join(
-        f'<div class="row" style="--p:{p:.3f}"><b class="{kind}">{"" if kind == "ok" else "▸"}</b>'
-        f'<span class="k">{k}</span><span class="v">{esc(v)}</span></div>'
-        for (k, v, kind), p in zip(TRACE, st["rows"])
-    )
-    fill = sum(st["rows"]) / len(TRACE)
-    b = st["bubble"]
+def jarvis() -> str:
+    reads = "".join(f'<li><b></b>{esc(r)}</li>' for r in JARVIS_READS)
+    acts = "".join(f'<li><b></b>{esc(a)}</li>' for a in JARVIS_ACTS)
     body = f"""
 <div class="wrap">
   <div class="text">
-    <div class="eyebrow">01 · Featured · AI agent</div>
-    <div class="title">Imperium</div>
-    <div class="tag">Plain English in. <em>Real actions out.</em></div>
-    <div class="desc">A FastAPI agent that turns texts from my phone into AppleScript and app actions on my Mac, built with collaborators. Security is the core feature, not an afterthought.</div>
+    <div class="eyebrow">02 · Personal AI assistant</div>
+    <div class="title">Jarvis</div>
+    <div class="tag">Call it, <em>or it calls you.</em></div>
+    <div class="desc">My personal AI assistant, reachable from my Mac or by phone call. It integrates 5 data sources, places calls, and delegates coding tasks to an AI coding agent. A safety layer gates sensitive actions with approval rules and PIN verification.</div>
     <div class="stats">
-      <div class="stat"><div class="n v">5</div><div class="l">checkpoints<br>per command</div></div>
-      <div class="stat"><div class="n">0</div><div class="l">raw model scripts<br>ever executed</div></div>
+      <div class="stat"><div class="n v">5</div><div class="l">data<br>sources</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">approval tiers:<br>allow · approve · block</div></div>
     </div>
-    {pills("Python", "FastAPI", "AppleScript", "Anthropic API", "Playwright")}
+    <div class="meta"><span class="status"><span class="dot"></span>Built Oct 2026 · not running</span></div>
+    {pills("TypeScript", "Claude API", "ElevenLabs", "Twilio")}
   </div>
   <div class="window visual">
-    <div class="chrome"><i></i><i></i><i></i><span>imperium · trace</span></div>
+    <div class="chrome"><i></i><i></i><i></i><span>jarvis · how it works</span></div>
     <div class="inner">
-      <div class="from">From phone · paired</div>
-      <div class="bubble" style="opacity:{b:.3f};transform:translateY({(1 - b) * 12:.1f}px)">Play Drake on Spotify</div>
-      <div class="trace" style="--f:{fill:.3f}"><i class="fill"></i>{rows}</div>
-      <div class="audit" style="opacity:{0.25 + 0.75 * st['audit']:.3f}"><span class="dot live" style="opacity:{st['audit']:.3f}"></span>audit · entry written to audit.db</div>
-      <div class="result" style="opacity:{st['result']:.3f};transform:translateY({(1 - st['result']) * 10:.1f}px)">
-        <span class="eq">{eq_bars(t)}</span>
-        <span><b>Now playing on the Mac</b><small>Spotify · Drake</small></span>
+      <div class="row2">
+        <div class="node"><small>Mac</small>Menu bar &amp; terminal</div>
+        <div class="node"><small>Phone</small>Call it, or get called</div>
+      </div>
+      <div class="join"><i></i><i></i></div>
+      <div class="core"><small>Jarvis</small>One assistant · shared memory · audit log</div>
+      <div class="stem"></div>
+      <div class="guard"><small>Safety layer</small>Approval rules · PIN on the phone · fails closed</div>
+      <div class="fork"><i></i><i></i></div>
+      <div class="row2 lists">
+        <div class="list"><small>Reads</small><ul>{reads}</ul></div>
+        <div class="list"><small>Acts, with approval</small><ul>{acts}</ul></div>
       </div>
     </div>
   </div>
 </div>"""
     css = f"""
 .wrap{{position:relative;display:flex;gap:56px;padding:64px 0 0 64px;height:100%}}
-.text{{width:540px;flex:none}}
-.visual{{width:560px;flex:none;align-self:stretch;margin-top:6px;border-bottom-right-radius:0;
+.text{{width:520px;flex:none}}
+.visual{{width:580px;flex:none;align-self:stretch;margin-top:6px;border-bottom-right-radius:0;
   border-right:none;border-bottom:none;border-top-right-radius:0}}
-.inner{{padding:30px 34px}}
-.from{{font-family:'MM Mono';font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:{MUTED};text-align:right}}
-.bubble{{margin:12px 0 0 auto;width:max-content;max-width:80%;background:{TEXT};color:{INK};font-size:21px;
-  padding:14px 20px;border-radius:20px 20px 6px 20px;font-family:'MM Body Bold'}}
-.trace{{position:relative;margin-top:30px;padding-left:4px}}
-.trace:before{{content:"";position:absolute;left:13px;top:14px;bottom:14px;width:1.5px;background:{LINE}}}
-.fill{{position:absolute;left:13px;top:14px;width:1.5px;height:calc(var(--f) * (100% - 28px));
-  background:linear-gradient({ACCENT},{ACCENT_DIM} 70%,{SIGNAL})}}
-.row{{opacity:calc(.3 + .7 * var(--p))}}
-.row b.ok:before{{content:'';width:4px;height:8px;margin-top:-2px;border:solid {ACCENT};border-width:0 1.5px 1.5px 0;
-  transform:rotate(45deg);opacity:var(--p)}}
-.row{{position:relative;display:flex;align-items:center;gap:16px;height:52px;font-family:'MM Mono';font-size:15.5px}}
-.row b{{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px;flex:none;
-  background:{PANEL};border:1.5px solid color-mix(in srgb,{ACCENT} calc(var(--p) * 100%),{LINE});color:{ACCENT};
-  margin-left:0}}
-.row b.run{{border-color:color-mix(in srgb,{SIGNAL} calc(var(--p) * 100%),{LINE});color:{SIGNAL};
-  box-shadow:0 0 calc(var(--p) * 16px) rgba(244,240,230,.4)}}
-.row .k{{width:74px;color:{TEXT};letter-spacing:.12em;font-family:'MM Mono Bold';font-size:14px}}
-.row .v{{color:{SOFT};white-space:nowrap}}
-.result{{display:flex;align-items:center;gap:16px;margin-top:14px;padding:16px 18px;border-radius:12px;
-  background:{RAISED};border:1.5px solid {LINE}}}
-.result b{{display:block;font-family:'MM Body Bold';font-weight:400;font-size:17px;color:{TEXT}}}
-.result small{{display:block;margin-top:3px;font-family:'MM Mono';font-size:12.5px;letter-spacing:.14em;
-  text-transform:uppercase;color:{MUTED}}}
-.eq{{display:flex;align-items:flex-end;gap:3px;height:22px;width:22px}}
-.eq i{{display:block;width:4px;border-radius:1px;background:{ACCENT}}}
-.audit{{display:flex;align-items:center;gap:12px;margin-top:26px;padding:14px 18px;border:1.5px dashed {LINE};
-  border-radius:12px;font-family:'MM Mono';font-size:14px;letter-spacing:.08em;color:{SOFT}}}
+.inner{{padding:28px 30px 0 30px}}
+.meta{{margin-top:26px}}
+small{{display:block;font-family:'MM Mono Bold';font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;
+  color:{MUTED};margin-bottom:6px}}
+.row2{{display:grid;grid-template-columns:1fr 1fr;gap:16px}}
+.node,.core,.guard,.list{{border:1.5px solid {LINE};border-radius:12px;background:{RAISED};padding:14px 16px;
+  font-family:'MM Mono';font-size:14px;letter-spacing:.04em;color:{SOFT}}}
+.core{{background:{TEXT};border-color:{TEXT};color:{INK}}}
+.core small{{color:#55524c}}
+.guard{{border-style:dashed;border-color:{ACCENT_DIM};background:transparent;color:{TEXT}}}
+.guard small{{color:{ACCENT}}}
+.join,.fork{{position:relative;height:26px}}
+.join i,.fork i{{position:absolute;top:0;bottom:0;width:1.5px;background:{ACCENT_DIM}}}
+.join i:nth-child(1),.fork i:nth-child(1){{left:25%}} .join i:nth-child(2),.fork i:nth-child(2){{left:75%}}
+.stem{{width:1.5px;height:20px;margin:0 auto;background:{ACCENT_DIM}}}
+.list ul{{list-style:none}}
+.list li{{display:flex;align-items:center;gap:10px;padding:6px 0;color:{TEXT}}}
+.list li b{{width:6px;height:6px;border-radius:50%;background:{ACCENT};flex:none}}
 @media (max-width:700px){{
   .wrap{{flex-direction:column;gap:40px;padding:44px 36px 0}}
   .text,.visual{{width:auto}}
   .visual{{margin:0 -36px 0 0}}
-  .row{{font-size:15px}} .row .v{{white-space:normal}}
+  .inner{{padding:24px 24px 0}}
+  .node,.core,.guard,.list{{font-size:13.5px}}
 }}"""
-    return page(body, seed=11, extra_css=css)
+    return page(body, seed=13, extra_css=css)
 
 
 # --- Screenshot cards -------------------------------------------------------
@@ -283,21 +287,11 @@ def shot_card(eyebrow: str, title: str, tag: str, desc: str, status: str, live: 
 
 def ledger() -> str:
     return shot_card(
-        "02 · Personal finance", "Ledger.m", "Every account, <em>one calm dashboard.</em>",
-        "A single-user finance app wired to my real bank accounts through Plaid. Net worth, spending and income "
-        "by category, monthly budgets, subscriptions, and what's due next.",
-        "Private deploy", False, ["Next.js", "Supabase", "Plaid", "Tailwind"],
+        "03 · Personal finance", "Ledger.m", "Every account, <em>one calm dashboard.</em>",
+        "Syncs my checking, savings and credit card accounts into one view, detects recurring charges and "
+        "categorizes spending. It helped me cut hundreds of dollars a month in unused subscriptions.",
+        "Private deploy", False, ["Next.js", "Supabase", "PostgreSQL", "Plaid"],
         "ledger.png", (292, 0, 1708, 1011), flip=True, seed=21, url="ledgerm.vercel.app", tone="dark",
-    )
-
-
-def dummy() -> str:
-    return shot_card(
-        "04 · E-commerce", "Dummy Peptides", "Catalog to checkout, <em>live.</em>",
-        "The storefront for a research-peptide business I co-own: catalog, accounts, cart, and an affiliate "
-        "program, with shipping, email, and SMS built in.",
-        "Live", True, ["React", "Supabase", "Shippo", "Twilio"],
-        "dummypeptides.png", (186, 110, 1244, 770), flip=True, seed=31, url="dummypeptides.com", tone="light",
     )
 
 
@@ -309,7 +303,7 @@ def cosmo() -> str:
 <div class="orbit o1"></div><div class="orbit o2"></div>
 <div class="wrap">
   <div class="text">
-    <div class="eyebrow">03 · iOS app</div>
+    <div class="eyebrow">04 · iOS app</div>
     <div class="title">Cosmo</div>
     <div class="tag">Your guide through the stars, <em>dreams, and destiny.</em></div>
     <div class="desc">An iOS-first astrology app with personalized AI-generated readings, user accounts, and paid subscriptions through RevenueCat.</div>
@@ -335,20 +329,67 @@ def cosmo() -> str:
     return page(body, seed=41, extra_css=css)
 
 
-# --- In progress ---------------------------------------------------------------
+# --- Still building ------------------------------------------------------------------
+# Matti Studio: the resume and the Matti-Studio repo (private). StayDue and EasyMail: each repo's
+# commit history and status docs, checked Nov 11, 2026 (no commits since early September).
 
-# Facts from each repo's commit history and status docs (StayDue README, EasyMail PROJECT_STATE.md).
+STUDIO_SERVICES = ["Websites", "Mobile apps", "Online ordering", "AI voice phone agents"]
+
+
+def studio() -> str:
+    services = "".join(f'<li><b></b>{esc(x)}</li>' for x in STUDIO_SERVICES)
+    body = f"""
+<div class="wrap">
+  <div class="text">
+    <div class="eyebrow">05 · My studio</div>
+    <div class="title">Matti Studio</div>
+    <div class="tag">AI and software <em>for metro Detroit businesses.</em></div>
+    <div class="desc">I build and run websites, mobile apps, online ordering and AI voice phone agents for local businesses. Kyuu Cafe is one of its clients.</div>
+    <div class="meta"><span class="status"><span class="dot live"></span>Founded Oct 2026</span></div>
+  </div>
+  <div class="side">
+    <div class="stats">
+      <div class="stat"><div class="n v">2</div><div class="l">active<br>clients</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">AI voice phone<br>agents built</div></div>
+    </div>
+    <div class="label">What it builds</div>
+    <ul class="svc">{services}</ul>
+  </div>
+</div>"""
+    css = f"""
+.wrap{{position:relative;display:flex;gap:56px;height:100%;padding:60px 64px}}
+.text{{flex:1}}
+.side{{width:420px;flex:none;padding-top:10px}}
+.meta{{margin-top:26px}}
+.top{{display:flex;justify-content:space-between;align-items:center}}
+.title{{font-size:86px;margin-top:20px}}
+.desc{{max-width:560px}}
+.stats{{margin-top:0}}
+.label{{font-family:'MM Mono Bold';font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:{MUTED};
+  margin-top:34px}}
+.svc{{list-style:none;margin-top:12px;border-top:1.5px solid {LINE}}}
+.svc li{{display:flex;align-items:center;gap:14px;padding:11px 0;border-bottom:1.5px solid {LINE};
+  font-family:'MM Mono';font-size:15px;color:{TEXT}}}
+.svc b{{width:6px;height:6px;border-radius:50%;background:{ACCENT}}}
+@media (max-width:700px){{
+  .wrap{{flex-direction:column;gap:36px;padding:44px 36px}}
+  .text{{flex:none}}
+  .side{{width:auto;padding-top:0}}
+  .title{{font-size:64px}}
+}}"""
+    return page(body, seed=17, extra_css=css)
+
+
 STAYDUE_LOG = [
     ("done", "V1 backend: Supabase auth, storage, AI extraction"),
     ("done", "Dashboard and sign-up redesign"),
     ("done", "Google sign-in and LMS selection"),
-    ("next", "Private beta"),
 ]
 EASYMAIL_LOG = [
     ("done", "Gmail and Outlook connected"),
     ("done", "Reliability audit, 8 edge cases fixed"),
     ("done", "Landing page and motion system"),
-    ("next", "Phase 13: testing"),
+    ("next", "Next milestone: phase 13, testing"),
 ]
 EASYMAIL_PHASE, EASYMAIL_PHASES = 12, 22
 
@@ -364,7 +405,7 @@ def progress() -> str:
     body = f"""
 <div class="wrap">
   <div class="panel">
-    <div class="top"><span class="status"><span class="dot"></span>Private beta</span><span class="eyebrow">05</span></div>
+    <div class="top"><span class="status"><span class="dot"></span>Last commit Sep 8, 2026</span><span class="eyebrow">06</span></div>
     <div class="title">StayDue</div>
     <div class="tag">Syllabus in. <em>Semester sorted.</em></div>
     <div class="desc">Upload a syllabus PDF, review what it found, and every deadline lands in one dashboard and calendar. Built with a collaborator.</div>
@@ -373,7 +414,7 @@ def progress() -> str:
     {pills("Next.js", "Supabase", "OpenAI")}
   </div>
   <div class="panel">
-    <div class="top"><span class="status"><span class="dot"></span>In development</span><span class="eyebrow">06</span></div>
+    <div class="top"><span class="status"><span class="dot"></span>Last commit Sep 14, 2026</span><span class="eyebrow">07</span></div>
     <div class="title">EasyMail</div>
     <div class="tag">Recap first. <em>Inbox second.</em></div>
     <div class="desc">A cross-inbox attention layer for Gmail and Outlook that shows what needs you before you open a mail client.</div>
@@ -415,22 +456,18 @@ def progress() -> str:
 
 
 CARDS = {
-    "imperium": (imperium, 740, 1290),
+    "kyuu": (kyuu, 720, 1140),
+    "jarvis": (jarvis, 740, 1340),
     "ledger": (ledger, 650, 790),
-    "dummypeptides": (dummy, 640, 960),
     "cosmo": (cosmo, 680, 960),
-    "progress": (progress, 680, 1400),
+    "studio": (studio, 500, 860),
+    "progress": (progress, 660, 1360),
 }
 
 
 def main(only: list[str] | None = None) -> None:
     for name, (build, desktop_h, phone_h) in CARDS.items():
         if only and name not in only:
-            continue
-        if name == "imperium":  # animated: the trace plays out, holds, and resets
-            frames = [(imperium(t), ms) for t, ms in imperium_frames()]
-            render_anim(frames, ASSETS / "cards" / f"{name}.webp", DESKTOP_W, desktop_h, scale=2)
-            render_anim(frames, ASSETS / "cards" / f"{name}-phone.webp", PHONE_W, phone_h, scale=2)
             continue
         html = build()
         render(html, ASSETS / "cards" / f"{name}.webp", DESKTOP_W, desktop_h, scale=2)

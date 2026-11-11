@@ -11,17 +11,18 @@ from brand import (ASSETS, INK, LINE, MUTED, PANEL, SOFT, TEXT, ACCENT, esc, fon
                    write)
 
 # (label, Simple Icons slug or None for a lettermark)
+# Only tech used in the featured projects (Kyuu Cafe, Jarvis, Ledger.m, Cosmo, Matti Studio), plus
+# Python, Docker and Git, which Meron asked to keep. (label, Simple Icons slug or None for a lettermark)
 STACK = [
-    ("Languages", [("TypeScript", "typescript"), ("JavaScript", "javascript"), ("Python", "python"),
-                   ("Java", "openjdk")]),
-    ("Frameworks", [("React", "react"), ("Next.js", "nextdotjs"), ("Expo", "expo"), ("FastAPI", "fastapi"),
-                    ("Node.js", "nodedotjs"), ("Tailwind", "tailwindcss")]),
+    ("Languages", [("TypeScript", "typescript"), ("JavaScript", "javascript"), ("Python", "python")]),
+    ("Frameworks", [("React", "react"), ("Next.js", "nextdotjs"), ("Expo", "expo"), ("Node.js", "nodedotjs"),
+                    ("Tailwind", "tailwindcss")]),
     ("Data & infra", [("Supabase", "supabase"), ("Postgres", "postgresql"), ("Vercel", "vercel"),
                       ("Docker", "docker")]),
-    ("AI & APIs", [("Anthropic", "anthropic"), ("OpenAI", "openai"), ("Plaid", None), ("Twilio", "twilio"),
-                   ("Resend", "resend"), ("RevenueCat", "revenuecat")]),
-    ("Test & ship", [("Vitest", "vitest"), ("Playwright", "playwright"), ("Git", "git"),
-                     ("Google Maps", "googlemaps")]),
+    ("AI & voice", [("Claude API", "anthropic"), ("OpenAI", "openai"), ("ElevenLabs", "elevenlabs"),
+                    ("Twilio", "twilio")]),
+    ("Payments & APIs", [("Stripe", "stripe"), ("Plaid", None), ("RevenueCat", "revenuecat"), ("Resend", "resend")]),
+    ("Test & ship", [("Vitest", "vitest"), ("Playwright", "playwright"), ("Git", "git")]),
 ]
 DESC = "; ".join(f"{cat}: {', '.join(n for n, _ in items)}" for cat, items in STACK) + "."
 

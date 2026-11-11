@@ -17,10 +17,13 @@ BUTTONS = {
     "linkedin": ("linkedin", "LinkedIn", "solid"),
     "email": ("email", "Email me", "solid"),
     "github": ("github", "Follow on GitHub", "solid"),
-    "demo": ("play", "Watch the demo", "solid"),
-    "live": ("arrow", "Visit the live site", "solid"),
-    "source": ("github", "Source", "solid"),
+    "kyuu": ("arrow", "Visit kyuucafe9.com", "solid"),
+    "client": ("lock", "Private client work", "ghost"),
+    "jarvis": ("lock", "Code not public", "ghost"),
     "private": ("lock", "Private deployment", "ghost"),
+    "source": ("github", "Source", "solid"),
+    "contrib": ("github", "Contributed to Imperium", "solid"),
+    "studio": ("arrow", "Visit mattistudio.dev", "solid"),
     "staydue": ("github", "StayDue", "solid"),
     "easymail": ("github", "EasyMail", "solid"),
 }
@@ -106,8 +109,6 @@ GLYPHS = {
                  'stroke="{c}" stroke-width="2" stroke-linecap="round"/>'),
     "email": ('<rect x="2" y="4.5" width="20" height="15" rx="3" fill="none" stroke="{c}" stroke-width="2"/>'
               '<path d="M3 6.5l9 6.5 9-6.5" fill="none" stroke="{c}" stroke-width="2" stroke-linejoin="round"/>'),
-    "play": ('<circle cx="12" cy="12" r="10" fill="none" stroke="{c}" stroke-width="2"/>'
-             '<path d="M10 8.2v7.6l6-3.8z" fill="{c}"/>'),
     "arrow": ('<path d="M7 17L17 7M9 7h8v8" fill="none" stroke="{c}" stroke-width="2" stroke-linecap="round" '
               'stroke-linejoin="round"/>'),
     "lock": ('<rect x="4.5" y="10.5" width="15" height="10.5" rx="2.5" fill="none" stroke="{c}" stroke-width="2"/>'

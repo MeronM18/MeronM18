@@ -47,7 +47,7 @@ Background light is white at 7–9% opacity from the top-left (a desk lamp), plu
 - **Hero signature:** on load, each glyph of the script name is traced as an outline (`stroke-dashoffset` on a `pathLength="1"` path per glyph, staggered left to right), then fills with ink. The rule below it draws out after.
 - **Hero sheen:** once the name is written, a soft light band sweeps across it every 8 seconds.
 - **Toolkit:** tiles rise in row by row on load, then a diagonal wave of steel light passes through the grid every 6 seconds, lifting each logo as it goes. Category underlines draw in.
-- **Imperium card:** an animated WebP (72 frames, ~380 KB, 7.6 s loop). The message arrives, PAIR → PLAN → PERMIT → GATE check off in turn while the progress line fills, RUN lights up, the audit entry is written, a "Now playing on the Mac" result slides in with a bouncing equalizer, then it resets. `cards.py` renders each frame's state in Chrome (`imperium_state(t)`) and `brand.render_anim` assembles them, 15 fps while moving and one long frame while holding.
+- **Cards are still images.** No project card animates; motion lives in the hero, headings, toolkit, stats panel and footer.
 - **Footer:** "Let's build it." is a second signature in Imperial Script that writes itself, holds, fades and writes again on a 9-second loop, so it plays whenever someone scrolls to it.
 - **Stats panel:** five headline numbers; **Commits today** is the hero: bone-white with a soft glow, a pulsing live dot and a faint steel plate behind it. The weekly contributions line draws itself, the area and peak marker fade in, the language bar grows segment by segment.
 - **Section headings:** the hairline draws out from the words and the diamond lands at its end.
@@ -65,9 +65,11 @@ python3 -m venv .venv && .venv/bin/pip install fonttools pillow uharfbuzz
 .venv/bin/python scripts/preview.py       # README in light/dark/phone, into .preview/
 ```
 
-Cards need Google Chrome. Live-site screenshots live in `scripts/shots/`. Every screenshot is toned toward steel through `tone=` in `cards.py`: `"light"` for bright sites (grayscale, dimmed, steel tint; Dummy Peptides) and `"dark"` for dark apps (grayscale, lifted slightly, steel tint; Ledger.m's Spending view). Cosmo's phone gets the same treatment through a CSS filter. Cards alternate sides: Imperium right, Ledger.m left, Cosmo right, Dummy Peptides left.
+Cards need Google Chrome. Screenshots live in `scripts/shots/` and are always real: taken from the live product, never mocked. Every screenshot is toned toward steel (grayscale plus a light steel tint): `tone="light"` for bright sites, `tone="dark"` for dark apps (Ledger.m's Spending view), and the same filter inline for Kyuu Cafe and Cosmo's phone shots.
 
-`.github/workflows/profile.yml` runs every 5 minutes (GitHub's scheduler often starts runs a few minutes late) and on every push to main. Each run starts from what's already on the `output` branch, rebuilds the hero's live **Now building** list (`scripts/now.py`: my two most recently pushed public repos from the last 21 days, excluding this repo, forks, templates and archived repos, with EasyMail · StayDue as the fallback) and the **stats panel** (`scripts/stats.py`), and publishes back to `output`. Every 3 hours, and on push, it also redraws the contribution snake (Platane/snk) in greyscale. The README loads all three from `output`, so main never gets automated commits. `assets/` holds local copies. Times on the panel are Eastern (ET).
+Kyuu Cafe's shots (`kyuu.jpg`, `kyuu-phone.jpg`) are Playwright captures of kyuucafe9.com at 1440×900 @2x and 390×844 @3x. This Mac's content filter stalls Chrome's own connection to that domain, so the capture lets Chrome render while Playwright's Node-side client fetches each request (`context.route` + `route.fetch`). It's still the live site; re-shoot the same way when the site changes.
+
+`.github/workflows/profile.yml` runs every 5 minutes (GitHub's scheduler often starts runs a few minutes late) and on every push to main. Each run starts from what's already on the `output` branch, rebuilds the hero's live **Now building** list (`scripts/now.py`: my two most recently pushed projects from the last 21 days. private repos appear only under a name in `SHOWN`, i.e. projects this README already features, so no other private repo is ever named; public repos in `HIDDEN` never appear; forks, templates, archived repos and this repo never appear. Fallback: Kyuu Cafe · Matti Studio) and the **stats panel** (`scripts/stats.py`), and publishes back to `output`. Every 3 hours, and on push, it also redraws the contribution snake (Platane/snk) in greyscale. The README loads all three from `output`, so main never gets automated commits. `assets/` holds local copies. Times on the panel are Eastern (ET).
 
 **Commits today** is counted directly, not read from GitHub's contribution graph. The graph only counts default branches and emails linked to the account, so it misses most real work. `stats.py` takes every repo pushed since midnight Eastern, walks every branch, dedupes commits by hash, and keeps those authored by me: my account, my Mac's local git email, or my Claude sessions (`MY_LOGINS`, `MY_EMAILS`, `AGENT_EMAILS`). Bots and other people's commits never count. The other four numbers are GitHub's own (contribution calendar, UTC days). If the API fails, the last good pull in `scripts/stats-snapshot.json` is used.
 
@@ -77,9 +79,30 @@ Private repos only count when the repo secret `PROFILE_TOKEN` holds a fine-grain
 
 Every link under a card is a button from `footer.py` (`BUTTONS`): mono label, steel glyph, panel fill. A label that isn't a link, like "Private deployment", uses the dashed `ghost` style so it never looks clickable. No default blue links on the page.
 
+## Selected work
+
+Strongest first, matching the resume. Cards alternate sides so the page has a rhythm:
+
+| # | Card | Visual | Links |
+| :-- | :-- | :-- | :-- |
+| 01 | Kyuu Cafe (client work, Matti Studio) | live site, desktop window + phone, left | Visit kyuucafe9.com · "Private client work" label. Never a source button: the repos are the client's |
+| 02 | Jarvis | diagram, right | "Code not public" label |
+| 03 | Ledger.m | Spending view, left | "Private deployment" label. The repo is private, so no source button |
+| 04 | Cosmo | phone, right | Source |
+
+Then one "Contributed to Imperium" button (a fork of Jasmanss/Imperium; never present it as a card of mine).
+
+- **No screenshots, no fake ones.** Jarvis has none, so its card is a diagram titled "how it works", built only from PersonalAI's `ARCHITECTURE.md` and `ROADMAP.md`. Its status says it was built in Oct 2026 and isn't running.
+- **Say what's live and what isn't.** Kyuu's website is live; its ordering system is built and in testing on staging (`order.kyuucafe9.com` isn't public yet). Update the status lines when that changes.
+- **No pricing.** Client contract amounts never appear.
+
 ## Still building
 
-The in-progress card is built from each repo's commit history and status docs: StayDue's README and commits, and EasyMail's `PROJECT_STATE.md` phase checklist. Update `STAYDUE_LOG`, `EASYMAIL_LOG` and `EASYMAIL_PHASE` in `scripts/cards.py` when those move.
+Two cards. **Matti Studio** (05) comes from the resume and the private Matti-Studio repo: what it builds, 2 active clients, 3 AI voice phone agents, founded Oct 2026, with a Visit mattistudio.dev button and no source button. **StayDue and EasyMail** (06, 07) come from each repo's commit history and status docs, checked Nov 11, 2026. Neither has had a commit since early September, so each shows its real last-commit date instead of a stage name, and StayDue's stale "private beta" line is gone (its Vercel URL now returns 404). Update `STAYDUE_LOG`, `EASYMAIL_LOG`, `EASYMAIL_PHASE` and those dates in `scripts/cards.py` when they move.
+
+## Toolkit
+
+Only tech used in a featured project (Kyuu Cafe, Jarvis, Ledger.m, Cosmo, Matti Studio), plus Python, Docker and Git, which Meron asked to keep. Ask before adding anything else.
 
 ## Do
 

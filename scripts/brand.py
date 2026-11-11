@@ -190,16 +190,6 @@ def render(html: str, out: Path, width: int, height: int, scale: int = 2, qualit
     print(f"wrote {out.relative_to(ROOT)} ({out.stat().st_size // 1024} KB)")
 
 
-def render_anim(frames: list[tuple[str, int]], out: Path, width: int, height: int, scale: int = 2,
-                quality: int = 86) -> None:
-    """An animated WebP from (html, milliseconds) frames. It loops forever; the first frame is the poster."""
-    images = [shoot(html, width, height, scale) for html, _ in frames]
-    out.parent.mkdir(parents=True, exist_ok=True)
-    images[0].save(out, "WEBP", save_all=True, append_images=images[1:], duration=[ms for _, ms in frames],
-                   loop=0, quality=quality, method=4, minimize_size=True, allow_mixed=False)
-    print(f"wrote {out.relative_to(ROOT)} ({len(frames)} frames, {out.stat().st_size // 1024} KB)")
-
-
 def write(out: Path, content: str) -> None:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(content)

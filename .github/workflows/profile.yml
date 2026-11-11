@@ -59,6 +59,7 @@ jobs:
 
       - name: Build hero with live "now building"
         env:
+          PROFILE_TOKEN: ${{ secrets.PROFILE_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python scripts/header.py --live --out dist
 

@@ -1,6 +1,6 @@
 <picture>
   <source media="(max-width: 600px)" srcset="https://raw.githubusercontent.com/MeronM18/MeronM18/output/header-phone.svg" />
-  <img src="https://raw.githubusercontent.com/MeronM18/MeronM18/output/header.svg" width="100%" alt="Meron Matti, written in script. Full-stack and indie developer. I build things for fun, then I ship them; agents that run my Mac from my phone; finance apps wired to real bank accounts; storefronts that ship real orders; iOS apps with paid subscriptions. Computer Science at Oakland University, class of 2027. Now building: my most recently pushed public repos, updated every 5 minutes." />
+  <img src="https://raw.githubusercontent.com/MeronM18/MeronM18/output/header.svg" width="100%" alt="Meron Matti, written in script. Full-stack developer and founder of Matti Studio. I build real software for real businesses: an ordering system for a real cafe, AI phone agents for local businesses, an AI assistant that takes my calls, a finance app on my real bank data, and iOS apps with paid subscriptions. Computer Science at Oakland University, class of 2027. Now building: my most recently pushed projects, updated every 5 minutes." />
 </picture>
 
 <p align="center">
@@ -13,7 +13,7 @@
 
 <br />
 
-I'm Meron, a Computer Science student at Oakland University. I build things for fun, and I ship them. So far that includes an agent that runs my Mac from my phone, a finance app wired to my own bank accounts (now with monthly budgets), a live storefront for a business I co-own, and an iOS app with paid subscriptions.
+I'm Meron, a Computer Science student at Oakland University, class of 2027. I build and ship software for real businesses through my studio, Matti Studio. Right now that's the website and ordering system for Kyuu Cafe in Shelby Township, MI. I also built Jarvis, an AI assistant I can reach by phone, and Ledger.m, a finance app that runs on my own bank data.
 
 <br />
 
@@ -26,32 +26,39 @@ I'm Meron, a Computer Science student at Oakland University. I build things for 
 
 <br />
 
-<a href="https://youtu.be/jEpbP-iGQTk">
+<a href="https://kyuucafe9.com">
   <picture>
-    <source media="(max-width: 600px)" srcset="./assets/cards/imperium-phone.webp" />
-    <img src="./assets/cards/imperium.webp" width="100%" alt="Imperium, an AI agent. Plain English in, real actions out. A FastAPI agent that turns texts from my phone into AppleScript and app actions on my Mac. Every command passes five checkpoints: pair, plan, permit, gate, run, and is written to an audit log. Python, FastAPI, AppleScript, Anthropic API, Playwright." />
+    <source media="(max-width: 600px)" srcset="./assets/cards/kyuu-phone.webp" />
+    <img src="./assets/cards/kyuu.webp" width="100%" alt="Kyuu Cafe, client work through Matti Studio. The production website for a cafe in Shelby Township, MI, with 500 to 1,000 visitors a week, and a custom ordering system across web, iOS and Android plus an iPad order screen for baristas, modeled on DoorDash and Uber Eats tablets and built to handle up to 150 orders a day. Designed in-house after the POS provider denied API access. Website live; ordering built and in testing. Shown: the live site on desktop and phone. Next.js, Expo, Supabase, Stripe." />
   </picture>
 </a>
 
 <p align="center">
-  <a href="https://youtu.be/jEpbP-iGQTk"><img src="./assets/buttons/demo.svg" height="40" alt="Watch the demo" /></a>
+  <a href="https://kyuucafe9.com"><img src="./assets/buttons/kyuu.svg" height="40" alt="Visit kyuucafe9.com" /></a>
   &nbsp;
-  <a href="https://github.com/MeronM18/Imperium"><img src="./assets/buttons/source.svg" height="40" alt="Imperium source" /></a>
+  <img src="./assets/buttons/client.svg" height="40" alt="Private client work" />
 </p>
 
 <br />
 
-<a href="https://github.com/MeronM18/Ledger.m">
-  <picture>
-    <source media="(max-width: 600px)" srcset="./assets/cards/ledger-phone.webp" />
-    <img src="./assets/cards/ledger.webp" width="100%" alt="Ledger.m, personal finance. A single-user finance app connected to my real bank accounts through Plaid; shown here is the Spending view: spending by category and by month, pace against last month, and the biggest changes. Private deploy. Next.js, Supabase, Plaid, Tailwind." />
-  </picture>
-</a>
+<picture>
+  <source media="(max-width: 600px)" srcset="./assets/cards/jarvis-phone.webp" />
+  <img src="./assets/cards/jarvis.webp" width="100%" alt="Jarvis, my personal AI assistant, reachable from my Mac or by phone call. It integrates 5 data sources (email, calendar, texts, school portal, finances), places calls and delegates coding tasks to an AI coding agent. A safety layer gates sensitive actions with approval rules (allow, approve, block) and PIN verification. Built October 2026, not running now. Shown: a diagram of how it works. TypeScript, Claude API, ElevenLabs, Twilio." />
+</picture>
+
+<p align="center">
+  <img src="./assets/buttons/jarvis.svg" height="40" alt="Code not public" />
+</p>
+
+<br />
+
+<picture>
+  <source media="(max-width: 600px)" srcset="./assets/cards/ledger-phone.webp" />
+  <img src="./assets/cards/ledger.webp" width="100%" alt="Ledger.m, personal finance. Syncs my checking, savings and credit card accounts into one view, detects recurring charges and categorizes spending; it helped me cut hundreds of dollars a month in unused subscriptions. Shown: the Spending view. Private deployment. Next.js, Supabase, PostgreSQL, Plaid." />
+</picture>
 
 <p align="center">
   <img src="./assets/buttons/private.svg" height="40" alt="Private deployment" />
-  &nbsp;
-  <a href="https://github.com/MeronM18/Ledger.m"><img src="./assets/buttons/source.svg" height="40" alt="Ledger.m source" /></a>
 </p>
 
 <br />
@@ -69,17 +76,8 @@ I'm Meron, a Computer Science student at Oakland University. I build things for 
 
 <br />
 
-<a href="https://dummypeptides.com">
-  <picture>
-    <source media="(max-width: 600px)" srcset="./assets/cards/dummypeptides-phone.webp" />
-    <img src="./assets/cards/dummypeptides.webp" width="100%" alt="Dummy Peptides, e-commerce. The live storefront for a research-peptide business I co-own: catalog, accounts, cart, and an affiliate program, with shipping, email and SMS through Shippo, Resend and Twilio. React, Supabase, Shippo, Twilio." />
-  </picture>
-</a>
-
 <p align="center">
-  <a href="https://dummypeptides.com"><img src="./assets/buttons/live.svg" height="40" alt="Visit the live site" /></a>
-  &nbsp;
-  <a href="https://github.com/MeronM18/dummypeptides"><img src="./assets/buttons/source.svg" height="40" alt="Dummy Peptides source" /></a>
+  <a href="https://github.com/Jasmanss/Imperium"><img src="./assets/buttons/contrib.svg" height="40" alt="Contributed to Imperium, a macOS AI agent by Jasmanss" /></a>
 </p>
 
 <br />
@@ -93,9 +91,22 @@ I'm Meron, a Computer Science student at Oakland University. I build things for 
 
 <br />
 
+<a href="https://mattistudio.dev">
+  <picture>
+    <source media="(max-width: 600px)" srcset="./assets/cards/studio-phone.webp" />
+    <img src="./assets/cards/studio.webp" width="100%" alt="Matti Studio, my AI and software studio for metro Detroit businesses: websites, mobile apps, online ordering and AI voice phone agents. 2 active clients; 3 AI voice phone agents built. Founded October 2026." />
+  </picture>
+</a>
+
+<p align="center">
+  <a href="https://mattistudio.dev"><img src="./assets/buttons/studio.svg" height="40" alt="Visit mattistudio.dev" /></a>
+</p>
+
+<br />
+
 <picture>
   <source media="(max-width: 600px)" srcset="./assets/cards/progress-phone.webp" />
-  <img src="./assets/cards/progress.webp" width="100%" alt="StayDue, private beta: upload a syllabus PDF and every deadline lands in one dashboard and calendar, built with a collaborator. Done: V1 backend, dashboard and sign-up redesign, Google sign-in and LMS selection. Next: private beta. EasyMail, in development, phase 12 of 22 complete: a cross-inbox attention layer for Gmail and Outlook. Done: Gmail and Outlook connected, reliability audit, landing page. Next: phase 13, testing." />
+  <img src="./assets/cards/progress.webp" width="100%" alt="StayDue, last commit September 8, 2026: upload a syllabus PDF and every deadline lands in one dashboard and calendar, built with a collaborator. Done: V1 backend, dashboard and sign-up redesign, Google sign-in and LMS selection. EasyMail, last commit September 14, 2026, phase 12 of 22 complete: a cross-inbox attention layer for Gmail and Outlook. Done: Gmail and Outlook connected, reliability audit, landing page. Next milestone: phase 13, testing." />
 </picture>
 
 <p align="center">
@@ -117,7 +128,7 @@ I'm Meron, a Computer Science student at Oakland University. I build things for 
 
 <picture>
   <source media="(max-width: 600px)" srcset="./assets/stack-phone.svg" />
-  <img src="./assets/stack.svg" width="100%" alt="Languages: TypeScript, JavaScript, Python, Java. Frameworks: React, Next.js, Expo, FastAPI, Node.js, Tailwind. Data and infra: Supabase, Postgres, Vercel, Docker. AI and APIs: Anthropic, OpenAI, Plaid, Twilio, Resend, RevenueCat. Test and ship: Vitest, Playwright, Git, Google Maps." />
+  <img src="./assets/stack.svg" width="100%" alt="Languages: TypeScript, JavaScript, Python. Frameworks: React, Next.js, Expo, Node.js, Tailwind. Data and infra: Supabase, Postgres, Vercel, Docker. AI and voice: Claude API, OpenAI, ElevenLabs, Twilio. Payments and APIs: Stripe, Plaid, RevenueCat, Resend. Test and ship: Vitest, Playwright, Git." />
 </picture>
 
 <br />

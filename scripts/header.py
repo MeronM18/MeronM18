@@ -6,19 +6,21 @@ from brand import (ACCENT, ASSETS, INK, LINE, MUTED, SIGNAL, SOFT, TEXT, esc, fo
                    outline_d, shape, write)
 
 NAME = "Meron Matti"
-ROLE = "FULL-STACK · INDIE DEVELOPER"
+ROLE = "FULL-STACK DEVELOPER · MATTI STUDIO"
 COORDS = "42.67° N · 83.22° W"
 PREFIX = "› I build "
+# Each phrase is backed by a card below it (Kyuu Cafe, Matti Studio, Jarvis, Ledger.m, Cosmo).
 PHRASES = [
-    "things for fun, then I ship them.",
-    "agents that run my Mac from my phone.",
-    "finance apps wired to real bank accounts.",
-    "storefronts that ship real orders.",
+    "real software for real businesses.",
+    "an ordering system for a real cafe.",
+    "AI phone agents for local businesses.",
+    "an AI assistant that takes my calls.",
+    "a finance app on my real bank data.",
     "iOS apps with paid subscriptions.",
 ]
 ABOUT = "Computer Science at Oakland University, class of 2027."
 NOW = "NOW BUILDING"
-NOW_ITEMS = "EASYMAIL · STAYDUE"  # replaced by the live list when built with --live (see now.py)
+NOW_ITEMS = "KYUU CAFE · MATTI STUDIO"  # replaced by the live list when built with --live (see now.py)
 
 # Typing rhythm, in seconds.
 TYPE, HOLD, DELETE, GAP = 0.055, 2.4, 0.022, 0.4
@@ -164,7 +166,7 @@ def now_chip(x: float, y: float, size: float, anchor_end: bool = False, max_w: f
 
 def svg(w: int, h: int, body: str) -> str:
     now = " and ".join(n.title() for n in NOW_ITEMS.split(" · "))
-    desc = (f"Meron Matti, full-stack and indie developer. I build {PHRASES[0]} Also: "
+    desc = (f"Meron Matti, full-stack developer and founder of Matti Studio. I build {PHRASES[0]} Also: "
             + "; ".join(p.rstrip(".") for p in PHRASES[1:]) + f". {ABOUT} Now building {now}.")
     return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" '
             f'aria-labelledby="t d"><title id="t">Meron Matti</title><desc id="d">{esc(desc)}</desc>'
@@ -198,8 +200,8 @@ def phone() -> str:
     b1, b2 = 290, 440
     rule_y = b2 + 44
     body = f"""
-<text x="{pad}" y="80" font-family="MM Mono Bold" font-size="16" letter-spacing="3.4" fill="{ACCENT}">FULL-STACK</text>
-<text x="{pad}" y="106" font-family="MM Mono Bold" font-size="16" letter-spacing="3.4" fill="{ACCENT}">INDIE DEVELOPER</text>
+<text x="{pad}" y="80" font-family="MM Mono Bold" font-size="16" letter-spacing="3.4" fill="{ACCENT}">FULL-STACK DEVELOPER</text>
+<text x="{pad}" y="106" font-family="MM Mono Bold" font-size="16" letter-spacing="3.4" fill="{ACCENT}">MATTI STUDIO</text>
 <text x="{w - pad}" y="80" text-anchor="end" font-family="MM Mono" font-size="15" letter-spacing="1.6" fill="{MUTED}">42.67° N</text>
 <text x="{w - pad}" y="106" text-anchor="end" font-family="MM Mono" font-size="15" letter-spacing="1.6" fill="{MUTED}">83.22° W</text>
 {signature("Meron", pad - 4, b1, size)}

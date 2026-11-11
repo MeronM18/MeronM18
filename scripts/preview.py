@@ -30,7 +30,7 @@ SLICE = {"desktop": 1400, "phone": 1600}
 
 def shoot(html: pathlib.Path, png: pathlib.Path, width: int, height: int, dark: bool) -> None:
     args = [CHROME, "--headless=new", "--disable-gpu", "--hide-scrollbars", "--force-device-scale-factor=1",
-            f"--window-size={width},{height}", f"--screenshot={png}", "--virtual-time-budget=1500"]
+            f"--window-size={width},{height}", f"--screenshot={png}", "--virtual-time-budget=4000"]
     if dark:
         args.append("--force-dark-mode")
     subprocess.run(args + [html.as_uri()], check=True, capture_output=True)
@@ -77,6 +77,11 @@ def readme() -> None:
         check=True, capture_output=True, text=True,
     ).stdout
     body = body.replace('="./assets/', f'="{ASSETS.as_uri()}/')
+    # Live images (header, stats) come from the output branch on GitHub; preview the local build instead
+    # when there is one, so a change shows up before it's pushed. The snake has no local copy.
+    raw = "https://raw.githubusercontent.com/MeronM18/MeronM18/output/"
+    for f in ASSETS.glob("*.svg"):
+        body = body.replace(raw + f.name, f.as_uri())
     for theme in PAGE:
         # Headless Chrome won't open a window narrower than ~500px, so the phone
         # page is a 390px column inside a 500px window (still under the 600px
