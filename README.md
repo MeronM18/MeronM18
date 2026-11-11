@@ -1,6 +1,6 @@
 <picture>
   <source media="(max-width: 600px)" srcset="https://raw.githubusercontent.com/MeronM18/MeronM18/output/header-phone.svg" />
-  <img src="https://raw.githubusercontent.com/MeronM18/MeronM18/output/header.svg" width="100%" alt="Meron Matti, written in script. Full-stack developer and founder of Matti Studio. I build real software for real businesses: an ordering system for a real cafe, AI phone agents for local businesses, an AI assistant that takes my calls, a finance app on my real bank data, and iOS apps with paid subscriptions. Computer Science at Oakland University, class of 2027. Now building: my most recently pushed projects, updated every 5 minutes." />
+  <img src="https://raw.githubusercontent.com/MeronM18/MeronM18/output/header.svg" width="100%" alt="Meron Matti, written in script. Full-stack developer and founder of Matti Studio. I build real software for real businesses: an ordering system for a real cafe, AI phone agents for local businesses, an AI assistant that takes my calls, a finance app on my real bank data, and an iOS app with 75+ TestFlight users. Computer Science at Oakland University, class of 2027. Now building: my most recently pushed projects, updated every 5 minutes." />
 </picture>
 
 <p align="center">
@@ -13,7 +13,7 @@
 
 <br />
 
-I'm Meron, a Computer Science student at Oakland University, class of 2027. I build and ship software for real businesses through my studio, Matti Studio. Right now that's the website and ordering system for Kyuu Cafe in Shelby Township, MI. I also built Jarvis, an AI assistant I can reach by phone, and Ledger.m, a finance app that runs on my own bank data.
+I'm Meron, a Computer Science student at Oakland University, class of 2027. I build and ship software for real businesses through my studio, Matti Studio. Right now that's the website and ordering system for Kyuu Cafe in Shelby Township, MI. I also built Jarvis, an AI assistant I can reach by phone, and Ledger.m, a finance app that runs on my own bank data. And I'm a loan officer at United Mortgage Lending (President's Club), where I built an internal React app that 45 employees use, saving the sales team 26+ hours a week.
 
 <br />
 
@@ -29,7 +29,7 @@ I'm Meron, a Computer Science student at Oakland University, class of 2027. I bu
 <a href="https://kyuucafe9.com">
   <picture>
     <source media="(max-width: 600px)" srcset="./assets/cards/kyuu-phone.webp" />
-    <img src="./assets/cards/kyuu.webp" width="100%" alt="Kyuu Cafe, client work through Matti Studio. The production website for a cafe in Shelby Township, MI, with 500 to 1,000 visitors a week, and a custom ordering system across web, iOS and Android plus an iPad order screen for baristas, modeled on DoorDash and Uber Eats tablets and built to handle up to 150 orders a day. Designed in-house after the POS provider denied API access. Website live; ordering built and in testing. Shown: the live site on desktop and phone. Next.js, Expo, Supabase, Stripe." />
+    <img src="./assets/cards/kyuu.webp" width="100%" alt="Kyuu Cafe, client work through Matti Studio. The production website for a cafe in Shelby Township, MI, drawing 1,000 visitors a week, and its custom ordering system on web, iOS and Android plus a real-time iPad order board for baristas, modeled on DoorDash and Uber Eats tablets. Built in-house on 17 Supabase Edge Functions after the POS provider denied API access, and covered by 20 pgTAP test suites. Website and ordering live: 50+ orders a day, peaking at 20+ an hour. Shown: the live site on desktop and phone. Next.js, React Native, Supabase, Stripe." />
   </picture>
 </a>
 
@@ -43,7 +43,7 @@ I'm Meron, a Computer Science student at Oakland University, class of 2027. I bu
 
 <picture>
   <source media="(max-width: 600px)" srcset="./assets/cards/jarvis-phone.webp" />
-  <img src="./assets/cards/jarvis.webp" width="100%" alt="Jarvis, my personal AI assistant, reachable from my Mac or by phone call. It integrates 5 data sources (email, calendar, texts, school portal, finances), places calls and delegates coding tasks to an AI coding agent. A safety layer gates sensitive actions with approval rules (allow, approve, block) and PIN verification. Built October 2026, not running now. Shown: a diagram of how it works. TypeScript, Claude API, ElevenLabs, Twilio." />
+  <img src="./assets/cards/jarvis.webp" width="100%" alt="Jarvis, my personal AI agent on the Claude API, reachable from my Mac or by phone call. It reads 5 data sources (email, calendar, texts, school portal, finances), places calls and delegates coding tasks to an AI coding agent. A safety layer gates sensitive actions with approval rules (allow, approve, block) and PIN verification. Built October 2026 and in use: 25+ tasks a week, 25+ calls and coding tasks delegated, 10+ sensitive actions gated. Shown: a diagram of how it works. TypeScript, Claude API, ElevenLabs, Twilio." />
 </picture>
 
 <p align="center">
@@ -54,7 +54,7 @@ I'm Meron, a Computer Science student at Oakland University, class of 2027. I bu
 
 <picture>
   <source media="(max-width: 600px)" srcset="./assets/cards/ledger-phone.webp" />
-  <img src="./assets/cards/ledger.webp" width="100%" alt="Ledger.m, personal finance. Syncs my checking, savings and credit card accounts into one view, detects recurring charges and categorizes spending; it helped me cut hundreds of dollars a month in unused subscriptions. Shown: the Spending view. Private deployment. Next.js, Supabase, PostgreSQL, Plaid." />
+  <img src="./assets/cards/ledger.webp" width="100%" alt="Ledger.m, personal finance. Syncs my checking, savings and credit card accounts into one view, flags recurring charges, price increases and lapsed subscriptions, and categorizes spending. 2,000+ transactions synced across 6+ accounts; it helped me cut $300 a month in unused subscriptions. Shown: the Spending view. Private deployment. Next.js, Supabase, PostgreSQL, Plaid." />
 </picture>
 
 <p align="center">
@@ -66,7 +66,7 @@ I'm Meron, a Computer Science student at Oakland University, class of 2027. I bu
 <a href="https://github.com/MeronM18/Cosmo">
   <picture>
     <source media="(max-width: 600px)" srcset="./assets/cards/cosmo-phone.webp" />
-    <img src="./assets/cards/cosmo.webp" width="100%" alt="Cosmo, iOS app. Your guide through the stars, dreams, and destiny. An iOS-first astrology app with personalized AI-generated readings, user accounts, and paid subscriptions through RevenueCat. Expo, React Native, TypeScript, Supabase, RevenueCat, OpenAI." />
+    <img src="./assets/cards/cosmo.webp" width="100%" alt="Cosmo, iOS app. Your guide through the stars, dreams, and destiny. An iOS-first astrology app with personalized AI-generated readings, user accounts, and in-app subscriptions through RevenueCat. In TestFlight beta with 75+ users. Expo, React Native, TypeScript, Supabase, RevenueCat, OpenAI." />
   </picture>
 </a>
 
@@ -94,7 +94,7 @@ I'm Meron, a Computer Science student at Oakland University, class of 2027. I bu
 <a href="https://mattistudio.dev">
   <picture>
     <source media="(max-width: 600px)" srcset="./assets/cards/studio-phone.webp" />
-    <img src="./assets/cards/studio.webp" width="100%" alt="Matti Studio, my AI and software studio for metro Detroit businesses: websites, mobile apps, online ordering and AI voice phone agents. 2 active clients; 3 AI voice phone agents built. Founded October 2026." />
+    <img src="./assets/cards/studio.webp" width="100%" alt="Matti Studio, my AI and software studio for metro Detroit businesses: websites, mobile apps, online ordering and AI voice phone agents. $8,000+ in client revenue from 2 clients, Kyuu Cafe and a distribution company. 3 AI voice phone agents (roofing, med spa, restaurant) that have handled 100+ live calls. Client work ships from one TypeScript and Next.js monorepo, with a multi-tenant admin platform verified by 152 test suites. Founded October 2026. TypeScript, Next.js, Supabase, Python, Twilio, Claude API." />
   </picture>
 </a>
 
@@ -128,7 +128,7 @@ I'm Meron, a Computer Science student at Oakland University, class of 2027. I bu
 
 <picture>
   <source media="(max-width: 600px)" srcset="./assets/stack-phone.svg" />
-  <img src="./assets/stack.svg" width="100%" alt="Languages: TypeScript, JavaScript, Python. Frameworks: React, Next.js, Expo, Node.js, Tailwind. Data and infra: Supabase, Postgres, Vercel, Docker. AI and voice: Claude API, OpenAI, ElevenLabs, Twilio. Payments and APIs: Stripe, Plaid, RevenueCat, Resend. Test and ship: Vitest, Playwright, Git." />
+  <img src="./assets/stack.svg" width="100%" alt="Languages: TypeScript, Python, JavaScript, SQL, Java, C/C++. Frameworks: React, Next.js, React Native, Node.js, Tailwind CSS. AI and ML: Claude API, OpenAI API, LLM agents, tool calling, prompt engineering. Data and cloud: PostgreSQL, Supabase, AWS, Vercel, Docker. Tools: Git, GitHub Actions, CI/CD, Linux, REST APIs, Playwright, Vitest." />
 </picture>
 
 <br />

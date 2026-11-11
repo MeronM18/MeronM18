@@ -43,7 +43,7 @@ Background light is white at 7–9% opacity from the top-left (a desk lamp), plu
 
 ## Motion
 
-- **Hero typing line:** "› I build …" types, holds, deletes and cycles through five phrases, driven by SMIL `<animate>` on clip rects, so it works inside `<img>` on GitHub. The steel caret blinks.
+- **Hero typing line:** "› I build …" types, holds, deletes and cycles through six phrases, driven by SMIL `<animate>` on clip rects, so it works inside `<img>` on GitHub. The steel caret blinks.
 - **Hero signature:** on load, each glyph of the script name is traced as an outline (`stroke-dashoffset` on a `pathLength="1"` path per glyph, staggered left to right), then fills with ink. The rule below it draws out after.
 - **Hero sheen:** once the name is written, a soft light band sweeps across it every 8 seconds.
 - **Toolkit:** tiles rise in row by row on load, then a diagonal wave of steel light passes through the grid every 6 seconds, lifting each logo as it goes. Category underlines draw in.
@@ -92,17 +92,18 @@ Strongest first, matching the resume. Cards alternate sides so the page has a rh
 
 Then one "Contributed to Imperium" button (a fork of Jasmanss/Imperium; never present it as a card of mine).
 
-- **No screenshots, no fake ones.** Jarvis has none, so its card is a diagram titled "how it works", built only from PersonalAI's `ARCHITECTURE.md` and `ROADMAP.md`. Its status says it was built in Oct 2026 and isn't running.
-- **Say what's live and what isn't.** Kyuu's website is live; its ordering system is built and in testing on staging (`order.kyuucafe9.com` isn't public yet). Update the status lines when that changes.
-- **No pricing.** Client contract amounts never appear.
+- **The resume is the source of truth.** Every number on a card or in alt text comes from Meron's resume (finalized Nov 11, 2026, `~/Documents/Resume/Meron_Matti_Resume.tex`), and recruiters will read the two side by side. When the resume changes, change the cards to match.
+- **No screenshots, no fake ones.** Jarvis has none, so its card is a diagram titled "how it works", built only from PersonalAI's `ARCHITECTURE.md` and `ROADMAP.md`. Its status says it was built in Oct 2026 and is in use (25+ tasks a week).
+- **Say what's live and what isn't.** Kyuu's website and ordering are both live (50+ orders a day). Cosmo is in TestFlight beta (75+ users): never imply it's on the App Store or earning subscription revenue.
+- **No per-client pricing.** A single client's contract amount never appears (Kyuu's stays on the resume only). Matti Studio's total client revenue ($8,000+) is fine.
 
 ## Still building
 
-Two cards. **Matti Studio** (05) comes from the resume and the private Matti-Studio repo: what it builds, 2 active clients, 3 AI voice phone agents, founded Oct 2026, with a Visit mattistudio.dev button and no source button. **StayDue and EasyMail** (06, 07) come from each repo's commit history and status docs, checked Nov 11, 2026. Neither has had a commit since early September, so each shows its real last-commit date instead of a stage name, and StayDue's stale "private beta" line is gone (its Vercel URL now returns 404). Update `STAYDUE_LOG`, `EASYMAIL_LOG`, `EASYMAIL_PHASE` and those dates in `scripts/cards.py` when they move.
+Two cards. **Matti Studio** (05) comes from the resume and the private Matti-Studio repo: what it builds, $8,000+ in client revenue, 2 clients (Kyuu Cafe and "a distribution company", never described any other way), 3 AI voice phone agents with 100+ live calls handled, the 152-suite multi-tenant admin platform, founded Oct 2026, with a Visit mattistudio.dev button and no source button. **StayDue and EasyMail** (06, 07) come from each repo's commit history and status docs, checked Nov 11, 2026. Neither has had a commit since early September, so each shows its real last-commit date instead of a stage name, and StayDue's stale "private beta" line is gone (its Vercel URL now returns 404). Update `STAYDUE_LOG`, `EASYMAIL_LOG`, `EASYMAIL_PHASE` and those dates in `scripts/cards.py` when they move.
 
 ## Toolkit
 
-Only tech used in a featured project (Kyuu Cafe, Jarvis, Ledger.m, Cosmo, Matti Studio), plus Python, Docker and Git, which Meron asked to keep. Ask before adding anything else.
+The resume's Technical Skills, in the resume's groups and order (Languages, Frameworks, AI & ML, Data & cloud, Tools), as Meron listed them on Nov 11, 2026. Brands use Simple Icons (CC0); skills that aren't a brand (SQL, LLM agents, tool calling, prompt engineering, CI/CD, REST APIs) and AWS, which has no free icon, use the stroke glyphs in `stack.py`. Labels that don't fit a tile wrap to two lines. Project-specific services (Stripe, Plaid, Twilio, ElevenLabs, RevenueCat) live in each card's pills, not here. Ask before adding anything the resume doesn't list.
 
 ## Do
 
@@ -116,4 +117,4 @@ Only tech used in a featured project (Kyuu Cafe, Jarvis, Ledger.m, Cosmo, Matti 
 - Don't use emoji as icons or bullets.
 - Don't commit Switzer or embed it as a font.
 - Don't embed third-party stat cards or badges. They break the palette and go down.
-- Don't claim anything the repos don't show (users, metrics, App Store status).
+- Don't claim anything the repos or the resume don't show (users, metrics, revenue, App Store status).

@@ -16,7 +16,7 @@ PHRASES = [
     "AI phone agents for local businesses.",
     "an AI assistant that takes my calls.",
     "a finance app on my real bank data.",
-    "iOS apps with paid subscriptions.",
+    "an iOS app with 75+ TestFlight users.",
 ]
 ABOUT = "Computer Science at Oakland University, class of 2027."
 NOW = "NOW BUILDING"

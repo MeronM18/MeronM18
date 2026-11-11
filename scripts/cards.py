@@ -95,8 +95,8 @@ def screenshot(src: str, crop: tuple[int, int, int, int], width: int) -> str:
 
 
 # --- Kyuu Cafe ------------------------------------------------------------------
-# Facts: the live site (kyuucafe9.com, screenshots taken with Playwright), kyuu-platform's
-# README and PROGRESS.md (ordering built and tested on staging, not public yet), and the resume.
+# Facts: the live site (kyuucafe9.com, screenshots taken with Playwright; ordering is live) and the
+# resume as finalized Nov 11, 2026. The contract amount stays off the page (see DESIGN.md).
 
 def kyuu() -> str:
     phone = (SHOTS / "kyuu-phone.jpg").as_uri()
@@ -113,16 +113,16 @@ def kyuu() -> str:
     <div class="eyebrow">01 · Client work · Matti Studio</div>
     <div class="title">Kyuu Cafe</div>
     <div class="tag">Every pickup order, <em>one queue.</em></div>
-    <div class="desc">The production website for a cafe in Shelby Township, MI, and a custom ordering system across web, iOS and Android, with an iPad order screen for baristas modeled on DoorDash and Uber Eats tablets. Built in-house after the POS provider denied API access.</div>
+    <div class="desc">The production website for a cafe in Shelby Township, MI, and its ordering system on web, iOS and Android, with a real-time iPad order board for baristas. Built on 17 Supabase Edge Functions after the POS provider denied API access.</div>
     <div class="stats">
-      <div class="stat"><div class="n">500–1K</div><div class="l">visitors<br>a week</div></div>
-      <div class="stat"><div class="n v">150</div><div class="l">orders a day,<br>built to handle</div></div>
+      <div class="stat"><div class="n">1,000</div><div class="l">visitors<br>a week</div></div>
+      <div class="stat"><div class="n v">50+</div><div class="l">orders<br>a day</div></div>
+      <div class="stat"><div class="n">20+</div><div class="l">an hour<br>at peak</div></div>
     </div>
     <div class="meta">
-      <span class="status"><span class="dot live"></span>Website live</span>
-      <span class="status"><span class="dot"></span>Ordering built · in testing</span>
+      <span class="status"><span class="dot live"></span>Website and ordering live</span>
     </div>
-    {pills("Next.js", "Expo", "Supabase", "Stripe")}
+    {pills("Next.js", "React Native", "Supabase", "Stripe")}
   </div>
 </div>"""
     css = f"""
@@ -133,8 +133,8 @@ def kyuu() -> str:
 .title{{font-size:88px}}
 .tag{{font-size:31px}}
 .desc{{font-size:18.5px;line-height:1.55}}
-.stats{{gap:40px;margin-top:26px}}
-.stat .n{{font-size:54px}}
+.stats{{gap:34px;margin-top:26px}}
+.stat .n{{font-size:52px}}
 .meta{{display:flex;flex-direction:column;gap:12px;margin-top:26px}}
 .handset{{position:absolute;right:-26px;top:236px;width:174px;border-radius:30px;padding:7px;background:#0d0d0d;
   border:1.5px solid #3a3a3a;box-shadow:0 30px 60px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.04)}}
@@ -158,7 +158,7 @@ def kyuu() -> str:
 
 # --- Jarvis ---------------------------------------------------------------------
 # No screenshots exist, so the visual is a diagram, labeled as one. Every box comes from
-# PersonalAI's ARCHITECTURE.md / ROADMAP.md (built and tested Oct 2026, shut down Oct 14).
+# PersonalAI's ARCHITECTURE.md / ROADMAP.md; the usage numbers are the resume's (Nov 11, 2026).
 
 JARVIS_READS = ["Email", "Calendar", "Texts", "School portal", "Finances"]
 JARVIS_ACTS = ["Sends email and texts", "Places phone calls", "Delegates coding tasks"]
@@ -173,12 +173,13 @@ def jarvis() -> str:
     <div class="eyebrow">02 · Personal AI assistant</div>
     <div class="title">Jarvis</div>
     <div class="tag">Call it, <em>or it calls you.</em></div>
-    <div class="desc">My personal AI assistant, reachable from my Mac or by phone call. It integrates 5 data sources, places calls, and delegates coding tasks to an AI coding agent. A safety layer gates sensitive actions with approval rules and PIN verification.</div>
+    <div class="desc">My personal AI agent on the Claude API, reachable from my Mac or by phone call. It reads 5 data sources, places calls, and delegates coding tasks to an AI coding agent. A safety layer gates sensitive actions with approval rules and PIN verification.</div>
     <div class="stats">
-      <div class="stat"><div class="n v">5</div><div class="l">data<br>sources</div></div>
-      <div class="stat"><div class="n">3</div><div class="l">approval tiers:<br>allow · approve · block</div></div>
+      <div class="stat"><div class="n v">25+</div><div class="l">tasks<br>a week</div></div>
+      <div class="stat"><div class="n">25+</div><div class="l">calls and coding<br>tasks delegated</div></div>
+      <div class="stat"><div class="n">10+</div><div class="l">sensitive<br>actions gated</div></div>
     </div>
-    <div class="meta"><span class="status"><span class="dot"></span>Built Oct 2026 · not running</span></div>
+    <div class="meta"><span class="status"><span class="dot live"></span>Built Oct 2026 · in use</span></div>
     {pills("TypeScript", "Claude API", "ElevenLabs", "Twilio")}
   </div>
   <div class="window visual">
@@ -235,9 +236,16 @@ small{{display:block;font-family:'MM Mono Bold';font-size:11.5px;letter-spacing:
 
 # --- Screenshot cards -------------------------------------------------------
 
+def stat_row(stats: list[tuple[str, str]]) -> str:
+    """(number, label) pairs; the first number is steel."""
+    return '<div class="stats">' + "".join(
+        f'<div class="stat"><div class="n{" v" if i == 0 else ""}">{esc(n)}</div><div class="l">{label}</div></div>'
+        for i, (n, label) in enumerate(stats)) + "</div>"
+
+
 def shot_card(eyebrow: str, title: str, tag: str, desc: str, status: str, live: bool, tags: list[str],
               shot: str, crop: tuple[int, int, int, int], flip: bool, seed: int, url: str,
-              tone: str | None = None) -> str:
+              tone: str | None = None, stats: list[tuple[str, str]] | None = None) -> str:
     """`tone` turns a screenshot steel so it sits in the monochrome page: "light" for bright sites
     (dimmed duotone), "dark" for dark apps (grayscale, lifted slightly)."""
     text = f"""
@@ -246,6 +254,7 @@ def shot_card(eyebrow: str, title: str, tag: str, desc: str, status: str, live: 
     <div class="title">{esc(title)}</div>
     <div class="tag">{tag}</div>
     <div class="desc">{esc(desc)}</div>
+    {stat_row(stats) if stats else ""}
     <div class="meta"><span class="status"><span class="dot{' live' if live else ''}"></span>{status}</span></div>
     {pills(*tags)}
   </div>"""
@@ -266,6 +275,8 @@ def shot_card(eyebrow: str, title: str, tag: str, desc: str, status: str, live: 
 .wrap:not(.flip) .visual{{border-top-right-radius:0;border-right:none}}
 .wrap.flip .visual{{width:700px;border-top-left-radius:0;border-left:none}}
 .meta{{display:flex;flex-direction:column;gap:10px;margin-top:26px}}
+.stats{{gap:36px;margin-top:26px}}
+.stat .n{{font-size:52px}}
 .toned .shot img{{filter:grayscale(1) brightness(.74) contrast(1.18)}}
 .toned.dark .shot img{{filter:grayscale(1) brightness(1.12) contrast(1.12)}}
 .toned.dark .shot:after{{display:none}}
@@ -288,10 +299,11 @@ def shot_card(eyebrow: str, title: str, tag: str, desc: str, status: str, live: 
 def ledger() -> str:
     return shot_card(
         "03 · Personal finance", "Ledger.m", "Every account, <em>one calm dashboard.</em>",
-        "Syncs my checking, savings and credit card accounts into one view, detects recurring charges and "
-        "categorizes spending. It helped me cut hundreds of dollars a month in unused subscriptions.",
+        "Syncs my checking, savings and credit card accounts into one view, then flags recurring charges, "
+        "price increases and lapsed subscriptions.",
         "Private deploy", False, ["Next.js", "Supabase", "PostgreSQL", "Plaid"],
         "ledger.png", (292, 0, 1708, 1011), flip=True, seed=21, url="ledgerm.vercel.app", tone="dark",
+        stats=[("$300", "a month in<br>subscriptions cut"), ("2,000+", "transactions,<br>6+ accounts")],
     )
 
 
@@ -306,7 +318,9 @@ def cosmo() -> str:
     <div class="eyebrow">04 · iOS app</div>
     <div class="title">Cosmo</div>
     <div class="tag">Your guide through the stars, <em>dreams, and destiny.</em></div>
-    <div class="desc">An iOS-first astrology app with personalized AI-generated readings, user accounts, and paid subscriptions through RevenueCat.</div>
+    <div class="desc">An iOS-first astrology app with personalized AI-generated readings, user accounts, and in-app subscriptions through RevenueCat.</div>
+    {stat_row([("75+", "TestFlight<br>users")])}
+    <div class="meta"><span class="status"><span class="dot"></span>In beta</span></div>
     {pills("Expo", "React Native", "TypeScript", "Supabase", "RevenueCat", "OpenAI")}
   </div>
   <img class="phone" src="{phone}">
@@ -316,6 +330,7 @@ def cosmo() -> str:
   radial-gradient(900px 500px at 0% 110%,rgba(169,180,192,.06),transparent 60%),{INK}}}
 .wrap{{position:relative;display:flex;align-items:center;gap:40px;height:100%;padding:0 40px 0 64px}}
 .text{{width:560px;flex:none}}
+.meta{{margin-top:26px}}
 .phone{{height:660px;margin:0 0 0 70px;filter:grayscale(1) sepia(.18) hue-rotate(175deg) saturate(.7) brightness(.96) contrast(1.08) drop-shadow(0 40px 60px rgba(0,0,0,.6))}}
 .orbit{{position:absolute;border:1.5px solid rgba(255,255,255,.10);border-radius:50%}}
 .o1{{width:560px;height:560px;left:672px;top:26px}}
@@ -330,7 +345,8 @@ def cosmo() -> str:
 
 
 # --- Still building ------------------------------------------------------------------
-# Matti Studio: the resume and the Matti-Studio repo (private). StayDue and EasyMail: each repo's
+# Matti Studio: the resume (Nov 11, 2026) and the Matti-Studio repo (private). The second client is only ever
+# "a distribution company". StayDue and EasyMail: each repo's
 # commit history and status docs, checked Nov 11, 2026 (no commits since early September).
 
 STUDIO_SERVICES = ["Websites", "Mobile apps", "Online ordering", "AI voice phone agents"]
@@ -344,13 +360,16 @@ def studio() -> str:
     <div class="eyebrow">05 · My studio</div>
     <div class="title">Matti Studio</div>
     <div class="tag">AI and software <em>for metro Detroit businesses.</em></div>
-    <div class="desc">I build and run websites, mobile apps, online ordering and AI voice phone agents for local businesses. Kyuu Cafe is one of its clients.</div>
+    <div class="desc">I build and run websites, mobile apps, online ordering and AI voice phone agents for local businesses. Clients so far: Kyuu Cafe and a distribution company. Client work ships from one TypeScript and Next.js monorepo, with a multi-tenant admin platform verified by 152 test suites.</div>
     <div class="meta"><span class="status"><span class="dot live"></span>Founded Oct 2026</span></div>
+    {pills("TypeScript", "Next.js", "Supabase", "Python", "Twilio", "Claude API")}
   </div>
   <div class="side">
+    <div class="stat lead"><div class="n v">$8,000+</div><div class="l">in client revenue</div></div>
     <div class="stats">
-      <div class="stat"><div class="n v">2</div><div class="l">active<br>clients</div></div>
-      <div class="stat"><div class="n">3</div><div class="l">AI voice phone<br>agents built</div></div>
+      <div class="stat"><div class="n">2</div><div class="l">active<br>clients</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">AI voice<br>phone agents</div></div>
+      <div class="stat"><div class="n">100+</div><div class="l">live calls<br>handled</div></div>
     </div>
     <div class="label">What it builds</div>
     <ul class="svc">{services}</ul>
@@ -364,7 +383,9 @@ def studio() -> str:
 .top{{display:flex;justify-content:space-between;align-items:center}}
 .title{{font-size:86px;margin-top:20px}}
 .desc{{max-width:560px}}
-.stats{{margin-top:0}}
+.stat.lead .n{{font-size:72px}}
+.stats{{margin-top:26px;gap:36px}}
+.stats .stat .n{{font-size:50px}}
 .label{{font-family:'MM Mono Bold';font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:{MUTED};
   margin-top:34px}}
 .svc{{list-style:none;margin-top:12px;border-top:1.5px solid {LINE}}}
@@ -456,11 +477,11 @@ def progress() -> str:
 
 
 CARDS = {
-    "kyuu": (kyuu, 720, 1140),
-    "jarvis": (jarvis, 740, 1340),
-    "ledger": (ledger, 650, 790),
-    "cosmo": (cosmo, 680, 960),
-    "studio": (studio, 500, 860),
+    "kyuu": (kyuu, 740, 1140),
+    "jarvis": (jarvis, 740, 1480),
+    "ledger": (ledger, 750, 1060),
+    "cosmo": (cosmo, 700, 1180),
+    "studio": (studio, 640, 1150),
     "progress": (progress, 660, 1360),
 }
 

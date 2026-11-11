@@ -1,5 +1,7 @@
 """Toolkit grid: rows of icon tiles, one row per category (desktop + phone).
 
+The resume's skills, grouped as on the resume.
+
 Motion: tiles rise in row by row on load, then a diagonal wave of steel light
 passes through the grid every few seconds, lifting each logo as it goes. Without
 CSS every tile is drawn and unlit.
@@ -10,20 +12,34 @@ from __future__ import annotations
 from brand import (ASSETS, INK, LINE, MUTED, PANEL, SOFT, TEXT, ACCENT, esc, font_css, icon_path, measure,
                    write)
 
-# (label, Simple Icons slug or None for a lettermark)
-# Only tech used in the featured projects (Kyuu Cafe, Jarvis, Ledger.m, Cosmo, Matti Studio), plus
-# Python, Docker and Git, which Meron asked to keep. (label, Simple Icons slug or None for a lettermark)
+# The resume's Technical Skills, in its order (Meron's list, Nov 11, 2026).
+# (label, icon): a Simple Icons slug (CC0), or "~key" for a stroke glyph from GLYPHS below,
+# drawn for skills that aren't a brand or whose brand has no free icon (AWS).
 STACK = [
-    ("Languages", [("TypeScript", "typescript"), ("JavaScript", "javascript"), ("Python", "python")]),
-    ("Frameworks", [("React", "react"), ("Next.js", "nextdotjs"), ("Expo", "expo"), ("Node.js", "nodedotjs"),
-                    ("Tailwind", "tailwindcss")]),
-    ("Data & infra", [("Supabase", "supabase"), ("Postgres", "postgresql"), ("Vercel", "vercel"),
-                      ("Docker", "docker")]),
-    ("AI & voice", [("Claude API", "anthropic"), ("OpenAI", "openai"), ("ElevenLabs", "elevenlabs"),
-                    ("Twilio", "twilio")]),
-    ("Payments & APIs", [("Stripe", "stripe"), ("Plaid", None), ("RevenueCat", "revenuecat"), ("Resend", "resend")]),
-    ("Test & ship", [("Vitest", "vitest"), ("Playwright", "playwright"), ("Git", "git")]),
+    ("Languages", [("TypeScript", "typescript"), ("Python", "python"), ("JavaScript", "javascript"),
+                   ("SQL", "~sql"), ("Java", "openjdk"), ("C/C++", "cplusplus")]),
+    ("Frameworks", [("React", "react"), ("Next.js", "nextdotjs"), ("React Native", "react"),
+                    ("Node.js", "nodedotjs"), ("Tailwind CSS", "tailwindcss")]),
+    ("AI & ML", [("Claude API", "anthropic"), ("OpenAI API", "openai"), ("LLM agents", "~agent"),
+                 ("Tool calling", "~call"), ("Prompt engineering", "~prompt")]),
+    ("Data & cloud", [("PostgreSQL", "postgresql"), ("Supabase", "supabase"), ("AWS", "~cloud"),
+                      ("Vercel", "vercel"), ("Docker", "docker")]),
+    ("Tools", [("Git", "git"), ("GitHub Actions", "githubactions"), ("CI/CD", "~cicd"), ("Linux", "linux"),
+               ("REST APIs", "~rest"), ("Playwright", "playwright"), ("Vitest", "vitest")]),
 ]
+
+# 24x24 stroke glyphs, same weight family as the buttons in footer.py.
+GLYPHS = {
+    "sql": '<ellipse cx="12" cy="5.5" rx="7.5" ry="3"/><path d="M4.5 5.5v13c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-13'
+           'M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3"/>',
+    "agent": '<path d="M11 4l2 5.5 5.5 2-5.5 2-2 5.5-2-5.5-5.5-2 5.5-2z"/><path d="M19.5 2.5v4M17.5 4.5h4"/>',
+    "call": '<path d="M2.5 12h8M7.5 9l3 3-3 3M15.5 4.5c-1.6 2-2.4 4.5-2.4 7.5s.8 5.5 2.4 7.5'
+            'M19.5 4.5c1.6 2 2.4 4.5 2.4 7.5s-.8 5.5-2.4 7.5"/>',
+    "prompt": '<rect x="2.5" y="4" width="19" height="16" rx="3"/><path d="M7 9.5l3 2.5-3 2.5M12.5 15h4.5"/>',
+    "cloud": '<path d="M7 18.5h10.5a4 4 0 0 0 .6-7.95 6 6 0 0 0-11.4-1.6A4.8 4.8 0 0 0 7 18.5z"/>',
+    "cicd": '<path d="M20 12a8 8 0 0 1-13.7 5.6M4 12a8 8 0 0 1 13.7-5.6"/><path d="M18 3v4h-4M6 21v-4h4"/>',
+    "rest": '<path d="M4 8h15M15.5 4.5L19 8l-3.5 3.5M20 16H5M8.5 12.5L5 16l3.5 3.5"/>',
+}
 DESC = "; ".join(f"{cat}: {', '.join(n for n, _ in items)}" for cat, items in STACK) + "."
 
 
@@ -42,19 +58,34 @@ MOTION = (
 )
 
 
-def tile(x: float, y: float, w: float, h: float, name: str, slug: str | None, icon: float, label: float,
+def wrap(name: str, size: float, width: float) -> list[str]:
+    """One line if it fits the tile, else two, split at the last space."""
+    if " " not in name or measure(name, "mono", size, 0.6) <= width:
+        return [name]
+    head, tail = name.rsplit(" ", 1)
+    return [head, tail]
+
+
+def tile(x: float, y: float, w: float, h: float, name: str, icon_key: str, icon: float, label: float,
          row: int = 0, col: int = 0) -> str:
     cx = x + w / 2
-    iy = y + h * 0.40
-    if slug:
-        s = icon / 24
-        glyph = (f'<path fill="{TEXT}" transform="translate({cx - icon / 2:.1f} {iy - icon / 2:.1f}) scale({s:.3f})" '
-                 f'd="{icon_path(slug)}"/>')
-    else:  # lettermark for brands without a CC0 icon
-        glyph = (f'<rect x="{cx - icon / 2:.1f}" y="{iy - icon / 2:.1f}" width="{icon}" height="{icon}" rx="7" '
-                 f'fill="none" stroke="{TEXT}" stroke-width="2.4"/><text x="{cx:.1f}" y="{iy + icon * 0.2:.1f}" '
-                 f'text-anchor="middle" font-family="MM Mono Bold" font-size="{icon * 0.55:.0f}" fill="{TEXT}">'
-                 f'{name[0]}</text>')
+    lines = wrap(name, label, w - 14)
+    iy = y + h * (0.40 if len(lines) == 1 else 0.34)
+    s = icon / 24
+    at = f'transform="translate({cx - icon / 2:.1f} {iy - icon / 2:.1f}) scale({s:.3f})"'
+    if icon_key.startswith("~"):
+        glyph = (f'<g {at} fill="none" stroke="{TEXT}" stroke-width="2" stroke-linecap="round" '
+                 f'stroke-linejoin="round">{GLYPHS[icon_key[1:]]}</g>')
+    else:
+        glyph = f'<path fill="{TEXT}" {at} d="{icon_path(icon_key)}"/>'
+    if len(lines) == 1:
+        text = (f'<text x="{cx:.1f}" y="{y + h * 0.82:.1f}" text-anchor="middle" font-family="MM Mono" '
+                f'font-size="{label}" letter-spacing="0.6" fill="{SOFT}">{esc(name)}</text>')
+    else:
+        y1 = y + h * 0.72
+        text = "".join(
+            f'<text x="{cx:.1f}" y="{y1 + i * label * 1.25:.1f}" text-anchor="middle" font-family="MM Mono" '
+            f'font-size="{label}" letter-spacing="0.6" fill="{SOFT}">{esc(t)}</text>' for i, t in enumerate(lines))
     enter = 0.15 + row * 0.12 + col * 0.05
     wave = f"{2.2 + col * 0.16 + row * 0.22:.2f}s"
     return (f'<g class="tile" style="animation-delay:{enter:.2f}s">'
@@ -62,16 +93,14 @@ def tile(x: float, y: float, w: float, h: float, name: str, slug: str | None, ic
             f'stroke-width="1.5"/>'
             f'<rect class="lit" opacity="0" style="animation-delay:{wave}" x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h}" '
             f'rx="14" fill="url(#glow)" stroke="{ACCENT}" stroke-opacity="0.8" stroke-width="1.5"/>'
-            f'<g class="ic" style="animation-delay:{wave}">{glyph}</g><text x="{cx:.1f}" y="{y + h * 0.82:.1f}" '
-            f'text-anchor="middle" font-family="MM Mono" font-size="{label}" letter-spacing="0.6" fill="{SOFT}">'
-            f'{esc(name)}</text></g>')
+            f'<g class="ic" style="animation-delay:{wave}">{glyph}</g>{text}</g>')
 
 
 def frame(w: int, h: int, body: str) -> str:
     labels = "".join(cat.upper() for cat, _ in STACK) + "".join(n for _, items in STACK for n, _ in items)
     return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" '
             f'aria-labelledby="t d"><title id="t">Toolkit</title><desc id="d">{esc(DESC)}</desc>'
-            f'<style>{font_css(mono=labels, monobold=labels + "P")}{MOTION}</style>'
+            f'<style>{font_css(mono=labels, monobold=labels)}{MOTION}</style>'
             f'<defs><radialGradient id="g" cx="1" cy="0" r="0.9"><stop offset="0" stop-color="{ACCENT}" '
             f'stop-opacity="0.12"/><stop offset="1" stop-color="{ACCENT}" stop-opacity="0"/></radialGradient>'
             f'<radialGradient id="glow" cx="0.5" cy="0.35" r="0.75"><stop offset="0" stop-color="{ACCENT}" '
@@ -89,7 +118,7 @@ def category(x: float, y: float, name: str, size: float) -> str:
 
 
 def desktop() -> str:
-    tw, th, gap, x0, top, row = 132, 112, 14, 290, 48, 136
+    tw, th, gap, x0, top, row = 120, 116, 12, 240, 48, 138
     body = ""
     for r, (cat, items) in enumerate(STACK):
         y = top + r * row
